@@ -1,4 +1,4 @@
-import { hero } from "@/data/content";
+import { hero, registerUrl } from "@/data/content";
 import { DoodleStar, Scribble } from "./icons";
 
 export default function Hero() {
@@ -14,13 +14,13 @@ export default function Hero() {
             {hero.eyebrow}
           </span>
 
-          <h1 className="mt-6 font-display text-4xl leading-tight text-ink sm:text-5xl lg:text-[3.4rem] lg:leading-[1.08]">
-            Votre école,{" "}
+          <h1 className="mt-6 font-display text-4xl leading-tight text-ink sm:text-5xl lg:text-[3.1rem] lg:leading-[1.1]">
+            Apprends le{" "}
             <span className="underline-scribble text-sky-deep">
-              pilotée
+              Web3
               <Scribble className="h-3.5 text-gold" />
             </span>{" "}
-            en un clic.
+            et l&apos;IA. Deviens le talent qu&apos;on recrute.
           </h1>
 
           <p className="mt-6 max-w-xl text-lg leading-relaxed text-ink/70">
@@ -29,13 +29,13 @@ export default function Hero() {
 
           <div className="mt-9 flex flex-wrap items-center gap-4">
             <a
-              href="#contact"
+              href={registerUrl}
               className="rounded-full bg-sky-deep px-7 py-3.5 text-base font-bold text-white shadow-[4px_4px_0_0_rgba(20,36,51,0.18)] transition hover:-translate-y-0.5 hover:shadow-[6px_6px_0_0_rgba(20,36,51,0.22)]"
             >
               {hero.ctaPrimary}
             </a>
             <a
-              href="#contact"
+              href={registerUrl}
               className="rounded-full border-2 border-ink/15 bg-transparent px-7 py-3.5 text-base font-bold text-ink transition hover:border-ink/30"
             >
               {hero.ctaSecondary}
@@ -55,22 +55,22 @@ export default function Hero() {
                 <span className="h-2.5 w-2.5 rounded-full bg-sky" />
                 <span className="h-2.5 w-2.5 rounded-full bg-sky-deep" />
               </div>
-              <span className="text-xs font-bold text-ink/40">Tableau de bord</span>
+              <span className="text-xs font-bold text-ink/40">Mon parcours</span>
             </div>
 
             <div className="mt-4 grid grid-cols-2 gap-3">
               <div className="rounded-xl bg-sky/10 p-3">
-                <p className="text-2xl font-extrabold text-sky-deep">96%</p>
-                <p className="text-xs font-semibold text-ink/50">Présence du jour</p>
+                <p className="text-2xl font-extrabold text-sky-deep">68%</p>
+                <p className="text-xs font-semibold text-ink/50">Solidity 101</p>
               </div>
               <div className="rounded-xl bg-gold/15 p-3">
-                <p className="text-2xl font-extrabold text-ink">12</p>
-                <p className="text-xs font-semibold text-ink/50">Bus en circulation</p>
+                <p className="text-2xl font-extrabold text-ink">4</p>
+                <p className="text-xs font-semibold text-ink/50">Projets validés</p>
               </div>
             </div>
 
             <div className="mt-3 space-y-2 rounded-xl border border-ink/10 p-3">
-              <p className="text-xs font-bold text-ink/40">Notifications parents</p>
+              <p className="text-xs font-bold text-ink/40">Prochain module</p>
               <div className="h-2 w-[85%] rounded-full bg-ink/10" />
               <div className="h-2 w-[60%] rounded-full bg-ink/10" />
               <div className="h-2 w-[70%] rounded-full bg-sky/30" />
@@ -78,8 +78,8 @@ export default function Hero() {
           </div>
 
           <div className="absolute -bottom-6 -right-4 rotate-6 rounded-2xl border-2 border-ink/10 bg-ink px-4 py-3 text-cream shadow-[6px_6px_0_0_rgba(20,36,51,0.15)]">
-            <p className="text-xs font-semibold text-cream/60">Bus 03</p>
-            <p className="text-sm font-bold">à 4 min de l&apos;école</p>
+            <p className="text-xs font-semibold text-cream/60">Certification</p>
+            <p className="text-sm font-bold">Web3 Foundations 🎓</p>
           </div>
         </div>
       </div>

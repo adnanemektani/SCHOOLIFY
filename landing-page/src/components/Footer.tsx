@@ -9,15 +9,15 @@ export default function Footer() {
           <div>
             <div className="flex items-center gap-2.5">
               <Image src="/brand/logo-mark.png" alt="" width={32} height={32} className="h-8 w-8" />
-              <span className="font-display text-lg text-cream">Schoolify</span>
+              <span className="font-display text-lg text-cream">E-dTech</span>
             </div>
             <p className="mt-4 max-w-xs text-sm leading-relaxed">
-              Le logiciel de gestion d&apos;école qui relie administration, enseignants,
-              parents et élèves.
+              La plateforme qui forme les jeunes talents aux métiers du Web3 et de
+              l&apos;Intelligence Artificielle.
             </p>
           </div>
 
-          <FooterCol title="Espaces" items={footerLinks.espaces} />
+          <FooterCol title="Formations" items={footerLinks.formations} />
           <FooterCol title="Ressources" items={footerLinks.ressources} />
 
           <div>
@@ -31,7 +31,7 @@ export default function Footer() {
         </div>
 
         <div className="mt-14 flex flex-col gap-3 border-t border-cream/10 pt-6 text-xs sm:flex-row sm:items-center sm:justify-between">
-          <p>© {new Date().getFullYear()} Schoolify. Tous droits réservés.</p>
+          <p>© {new Date().getFullYear()} E-dTech. Tous droits réservés.</p>
           <p>Casablanca, Maroc</p>
         </div>
       </div>

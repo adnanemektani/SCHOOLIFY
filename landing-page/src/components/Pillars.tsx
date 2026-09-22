@@ -1,28 +1,28 @@
 import { pillars } from "@/data/content";
 import {
-  IconSimple,
-  IconSecure,
-  IconFunctional,
-  IconSupportHand,
-  IconAdapted,
-  IconClock,
+  IconGlobeOnline,
+  IconMentor,
+  IconProject,
+  IconCert,
+  IconCommunity,
+  IconGrowth,
 } from "./icons";
 
-const icons = [IconSimple, IconSecure, IconFunctional, IconSupportHand, IconAdapted, IconClock];
+const icons = [IconGlobeOnline, IconMentor, IconProject, IconCert, IconCommunity, IconGrowth];
 const tilts = ["rotate-1", "-rotate-1", "rotate-0", "-rotate-1", "rotate-1", "rotate-0"];
 
 export default function Pillars() {
   return (
-    <section id="fonctionnalites" className="px-6 py-24">
+    <section id="fonctionnement-atouts" className="px-6 py-24">
       <div className="mx-auto max-w-6xl">
         <div className="max-w-2xl">
-          <p className="font-display text-sm tracking-wide text-gold">Pourquoi Schoolify</p>
+          <p className="font-display text-sm tracking-wide text-gold">Pourquoi E-dTech</p>
           <h2 className="mt-3 font-display text-3xl text-ink sm:text-4xl">
-            Pensé pour un meilleur suivi scolaire
+            Une formation pensée pour l&apos;emploi, pas juste le diplôme
           </h2>
           <p className="mt-4 text-lg text-ink/65">
-            Une solution simple, performante et intuitive, capable de gérer l&apos;ensemble
-            des processus de la vie scolaire — de l&apos;administration jusqu&apos;au dernier bus du soir.
+            Du premier cours au premier entretien, chaque étape du parcours est construite
+            pour rapprocher les apprenants du marché réel du Web3 et de l&apos;IA.
           </p>
         </div>
 

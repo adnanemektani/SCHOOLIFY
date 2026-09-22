@@ -1,5 +1,5 @@
 import Image from "next/image";
-import { nav } from "@/data/content";
+import { nav, registerUrl } from "@/data/content";
 
 export default function Header() {
   return (
@@ -15,7 +15,7 @@ export default function Header() {
             priority
           />
           <span className="font-display text-xl tracking-wide text-sky-deep">
-            Schoolify
+            E-dTech
           </span>
         </a>
 
@@ -32,10 +32,10 @@ export default function Header() {
         </nav>
 
         <a
-          href="#contact"
+          href={registerUrl}
           className="rounded-full bg-ink px-5 py-2.5 text-sm font-bold text-cream transition hover:bg-sky-deep"
         >
-          Essai gratuit
+          Créer mon compte
         </a>
       </div>
 

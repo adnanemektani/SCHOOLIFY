@@ -1,10 +1,11 @@
 import Header from "@/components/Header";
 import Hero from "@/components/Hero";
 import Stats from "@/components/Stats";
+import Mission from "@/components/Mission";
 import Pillars from "@/components/Pillars";
-import Features from "@/components/Features";
-import Spaces from "@/components/Spaces";
-import Pricing from "@/components/Pricing";
+import Formations from "@/components/Formations";
+import Metiers from "@/components/Metiers";
+import HowItWorks from "@/components/HowItWorks";
 import CallToAction from "@/components/CallToAction";
 import Footer from "@/components/Footer";
 
@@ -15,10 +16,11 @@ export default function Home() {
       <main>
         <Hero />
         <Stats />
+        <Mission />
         <Pillars />
-        <Features />
-        <Spaces />
-        <Pricing />
+        <Formations />
+        <Metiers />
+        <HowItWorks />
         <CallToAction />
       </main>
       <Footer />

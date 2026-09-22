@@ -1,21 +1,21 @@
-import { features } from "@/data/content";
-import { IconAdmin, IconBus, IconChat, IconFolder } from "./icons";
+import { formations } from "@/data/content";
+import { IconBlockchain, IconBrainAI, IconPrompt, IconDataChart } from "./icons";
 
-const icons = [IconAdmin, IconBus, IconChat, IconFolder];
+const icons = [IconBlockchain, IconBrainAI, IconPrompt, IconDataChart];
 
-export default function Features() {
+export default function Formations() {
   return (
-    <section className="bg-ink px-6 py-24 text-cream">
+    <section id="formations" className="bg-ink px-6 py-24 text-cream">
       <div className="mx-auto max-w-6xl">
         <div className="max-w-2xl">
-          <p className="font-display text-sm tracking-wide text-gold">Ce que Schoolify gère</p>
+          <p className="font-display text-sm tracking-wide text-gold">Nos formations</p>
           <h2 className="mt-3 font-display text-3xl sm:text-4xl">
-            Une plateforme, tous les services de l&apos;école
+            Des parcours Web3 & IA, pas des cours théoriques
           </h2>
         </div>
 
         <div className="mt-12 grid gap-5 md:grid-cols-2">
-          {features.map((f, i) => {
+          {formations.map((f, i) => {
             const Icon = icons[i];
             return (
               <div

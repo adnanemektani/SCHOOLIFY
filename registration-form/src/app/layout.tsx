@@ -14,9 +14,8 @@ const nunito = Nunito({
 });
 
 export const metadata: Metadata = {
-  title: "E-dTech — Apprends le Web3 et l'IA",
-  description:
-    "E-dTech forme les jeunes talents aux métiers du Web3 et de l'Intelligence Artificielle : parcours pratiques, mentorat et projets réels, du premier cours jusqu'au premier emploi.",
+  title: "E-dTech — Créer mon compte",
+  description: "Rejoins E-dTech et commence ton parcours Web3 & IA.",
 };
 
 export default function RootLayout({

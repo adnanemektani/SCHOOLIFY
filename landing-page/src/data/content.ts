@@ -1,135 +1,95 @@
-// Contenu de la landing page Schoolify — basé sur schoolify-edtech.com + brief fondateur
+// Contenu de la landing page E-dTech — plateforme de formation aux métiers du Web3 et de l'IA
 
 export const nav = [
-  { label: "Fonctionnalités", href: "#fonctionnalites" },
-  { label: "Espaces", href: "#espaces" },
-  { label: "Tarifs", href: "#tarifs" },
-  { label: "Contact", href: "#contact" },
+  { label: "Mission", href: "#mission" },
+  { label: "Formations", href: "#formations" },
+  { label: "Métiers", href: "#metiers" },
+  { label: "Comment ça marche", href: "#fonctionnement" },
 ];
 
+export const registerUrl = "http://localhost:3211";
+
 export const hero = {
-  eyebrow: "Logiciel de gestion scolaire",
-  title: "Votre école, pilotée en un clic.",
+  eyebrow: "Formation aux métiers du futur",
+  title: "Apprends le Web3 et l'IA. Deviens le talent qu'on recrute.",
   subtitle:
-    "Schoolify réunit administration, suivi des élèves, transport et communication avec les parents dans une seule plateforme simple, sécurisée et pensée pour le terrain.",
-  ctaPrimary: "Démarrer l'essai gratuit",
-  ctaSecondary: "Demander une démo",
-  note: "Sans carte bancaire — installation accompagnée",
+    "E-dTech forme les jeunes talents aux métiers du Web3 et de l'Intelligence Artificielle : parcours pratiques, mentorat et projets réels, du premier cours jusqu'au premier emploi.",
+  ctaPrimary: "Créer mon compte",
+  ctaSecondary: "Start Learning",
+  note: "Gratuit pour démarrer — aucune carte bancaire requise",
 };
 
 export const stats = [
-  { value: "500+", label: "établissements équipés" },
-  { value: "40+", label: "fonctionnalités actives" },
-  { value: "6", label: "pays d'Afrique francophone" },
+  { value: "12+", label: "parcours Web3 & IA" },
+  { value: "3 000+", label: "apprenants accompagnés" },
+  { value: "85%", label: "en poste ou en stage après certification" },
 ];
+
+export const mission = {
+  eyebrow: "Notre mission",
+  title: "Rendre les métiers du Web3 et de l'IA accessibles à tous",
+  text: "Les compétences Web3 et IA restent réservées à une minorité, alors que la demande explose. E-dTech construit le pont entre la curiosité d'un débutant et l'expertise recherchée par les entreprises — avec un apprentissage guidé, concret et connecté au marché de l'emploi.",
+};
 
 export const pillars = [
   {
-    title: "Simple",
-    text: "Déploiement, prise en main et opérations quotidiennes pensés pour aller vite, sans formation lourde.",
+    title: "100% en ligne",
+    text: "Apprends à ton rythme, depuis n'importe où, sur desktop comme sur mobile.",
   },
   {
-    title: "Sécurisé",
-    text: "Hébergement et données des élèves protégés selon des standards stricts, à chaque étape.",
+    title: "Mentorat réel",
+    text: "Des professionnels du Web3 et de l'IA t'accompagnent tout au long du parcours.",
   },
   {
-    title: "Fonctionnel",
-    text: "Les fonctions attendues par écoles, collèges et lycées — riches, testées sur le terrain marocain.",
+    title: "Projets concrets",
+    text: "Chaque module se termine par un projet réel à ajouter à ton portfolio.",
   },
   {
-    title: "Accompagné",
-    text: "Une équipe qui vous aide au paramétrage et à l'intégration, du premier jour au déploiement complet.",
+    title: "Certifiant",
+    text: "Une certification reconnue à la fin de chaque parcours, valorisable auprès des recruteurs.",
   },
   {
-    title: "Adapté",
-    text: "Le paramétrage colle à la taille et aux besoins réels de votre établissement, pas l'inverse.",
+    title: "Communauté active",
+    text: "Rejoins une communauté d'apprenants et d'alumnis qui s'entraident et partagent les opportunités.",
   },
   {
-    title: "SAV 7j/7",
-    text: "Des experts joignables par téléphone ou email, formations et supports inclus, 24h/24.",
+    title: "Employabilité",
+    text: "Ateliers CV, mise en relation avec des entreprises partenaires et suivi post-formation.",
   },
 ];
 
-export const features = [
+export const formations = [
   {
-    title: "Gestion administrative complète",
-    text: "Inscriptions, dossiers élèves, emplois du temps, notes et bulletins centralisés dans un seul outil.",
+    title: "Développement Blockchain",
+    text: "Smart contracts, Solidity et applications décentralisées, de la théorie au premier déploiement.",
   },
   {
-    title: "Transport scolaire géolocalisé",
-    text: "Suivi en temps réel des bus et notifications instantanées aux parents à chaque étape du trajet.",
+    title: "Intelligence Artificielle & Machine Learning",
+    text: "Fondations du ML, entraînement de modèles et mise en production, avec des cas d'usage réels.",
   },
   {
-    title: "Application parents & professeurs",
-    text: "Un fil de communication continu : absences, devoirs, résultats et annonces, accessibles à tout moment.",
+    title: "Prompt Engineering & IA générative",
+    text: "Concevoir des solutions IA appliquées : automatisation, agents, outils métiers augmentés par l'IA.",
   },
   {
-    title: "Suivi des dossiers élèves",
-    text: "Historique scolaire, documents et progression réunis, consultables par l'administration en un instant.",
+    title: "Data Science",
+    text: "Analyse de données, visualisation et prise de décision pilotée par la donnée.",
   },
 ];
 
-export const spaces = [
-  { title: "Administration", text: "Pilotage global de l'établissement et des équipes." },
-  { title: "Direction", text: "Vue d'ensemble, indicateurs et décisions au quotidien." },
-  { title: "Espace Professeurs", text: "Notes, absences et communication avec les familles." },
-  { title: "Espace Parents", text: "Suivi scolaire et transport de leurs enfants en direct." },
-  { title: "Espace Élèves", text: "Emploi du temps, devoirs et résultats à portée de main." },
+export const metiers = [
+  { title: "Développeur Blockchain", text: "Conçoit et sécurise des smart contracts et applications décentralisées." },
+  { title: "Ingénieur IA", text: "Construit et déploie des modèles d'intelligence artificielle en production." },
+  { title: "Data Scientist", text: "Transforme la donnée en décisions et en produits intelligents." },
+  { title: "Prompt Engineer", text: "Conçoit des interactions et automatisations autour des modèles génératifs." },
+  { title: "Web3 Product Manager", text: "Pilote des produits décentralisés, de l'idée jusqu'au marché." },
 ];
 
-export const pricing = [
-  {
-    name: "Free",
-    price: "0",
-    period: "toujours gratuit",
-    description: "Pour démarrer sans engagement.",
-    features: [
-      "Gestion administrative de base",
-      "Application de suivi élèves",
-      "Accès école / élèves / parents / profs",
-    ],
-    highlighted: false,
-  },
-  {
-    name: "Basic",
-    price: "19",
-    period: "/ mois",
-    description: "Pour professionnaliser la gestion financière.",
-    features: [
-      "Solution administrative complète",
-      "RH & comptabilité intégrées",
-      "Application de suivi élèves",
-      "Transport scolaire",
-    ],
-    highlighted: false,
-  },
-  {
-    name: "Pro",
-    price: "49",
-    period: "/ mois",
-    description: "Pour développer la présence de l'école.",
-    features: [
-      "Tout Basic",
-      "Création de site web dédié",
-      "Gestion des réseaux sociaux (1 an)",
-      "Accompagnement digital",
-    ],
-    highlighted: true,
-  },
-  {
-    name: "Premium",
-    price: "250",
-    period: "/ mois",
-    description: "Pour une école 100% digitalisée.",
-    features: [
-      "Tout Pro",
-      "Badge & carte de présence",
-      "Plateforme e-learning",
-      "Recouvrement des créances",
-      "Reconnaissance faciale",
-    ],
-    highlighted: false,
-  },
+export const steps = [
+  { title: "Créer un compte", text: "Un formulaire simple pour rejoindre la plateforme en moins de deux minutes." },
+  { title: "Choisir un parcours", text: "Web3, IA, Data ou Prompt Engineering — selon ton objectif de carrière." },
+  { title: "Apprendre en pratiquant", text: "Cours, mentorat et projets réels avec suivi personnalisé." },
+  { title: "Se certifier et candidater", text: "Certification reconnue et mise en relation avec des entreprises partenaires." },
 ];
 
 export const contact = {
@@ -139,7 +99,7 @@ export const contact = {
 };
 
 export const footerLinks = {
-  espaces: ["Administration", "Direction", "Professeurs", "Parents", "Élèves"],
-  ressources: ["Documentation", "Centre d'aide", "FAQ", "Support 24/7"],
-  entreprise: ["À propos", "Nos packs", "Contact", "Confidentialité"],
+  formations: ["Blockchain", "Intelligence Artificielle", "Prompt Engineering", "Data Science"],
+  ressources: ["Centre d'aide", "FAQ", "Blog", "Communauté"],
+  entreprise: ["Notre mission", "À propos", "Contact", "Confidentialité"],
 };
