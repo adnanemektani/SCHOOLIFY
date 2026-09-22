@@ -6,7 +6,7 @@ import Image from "next/image";
 import FormField from "@/components/FormField";
 import RadioPills from "@/components/RadioPills";
 
-const LANDING_URL = "http://localhost:3210";
+const LANDING_URL = "https://landing-page-eta-ten-70.vercel.app";
 
 type FormState = {
   firstName: string;

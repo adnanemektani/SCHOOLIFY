@@ -7,7 +7,7 @@ export const nav = [
   { label: "Comment ça marche", href: "#fonctionnement" },
 ];
 
-export const registerUrl = "http://localhost:3211";
+export const registerUrl = "https://registration-form-pi-rosy.vercel.app";
 
 export const hero = {
   eyebrow: "Formation aux métiers du futur",
