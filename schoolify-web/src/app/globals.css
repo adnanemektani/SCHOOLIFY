@@ -296,4 +296,9 @@ main {
     .footer-bottom { flex-direction: column; align-items: flex-start; }
     .footer-legal { gap: 16px; }
   }
+
+/* The legacy .site-footer>div rule (old single-div footer) was hijacking the new
+   footer's .section-shell, forcing footer-top/footer-bottom into a flex row instead
+   of stacking. Higher-specificity reset so the new footer's own grid/flex rules apply. */
+.site-footer>.section-shell{display:block}
   
