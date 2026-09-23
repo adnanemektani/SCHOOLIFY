@@ -17,20 +17,12 @@ export default function Home() {
       <section className="hero-section">
         <SiteHeader />
         <div className="hero-content">
-          <div className="eyebrow">Les compétences de demain, accessibles aujourd’hui</div>
           <h1>Apprends à <em>construire</em><br />le futur.</h1>
           <p className="hero-copy">Schoolify t’ouvre les portes des métiers du Web3 et de l’IA avec des parcours concrets, humains et pensés pour passer à l’action.</p>
           <div className="hero-actions"><Link className="button button-large" href="/signup">Créer mon compte <span>→</span></Link><a className="video-link" href="#comment-ca-marche"><i>▶</i> Découvrir Schoolify</a></div>
           <div className="trust-line"><div className="avatars"><b>Y</b><b>A</b><b>S</b><b>M</b></div><span><strong>+1 200 apprenants</strong> déjà en mouvement</span></div>
         </div>
-        <div className="hero-visual" aria-label="Aperçu de la progression d'un apprenant">
-          <div className="orbit orbit-one" /><div className="orbit orbit-two" /><div className="blue-sphere" /><div className="neural-core"><span /><i /><b /></div>
-          <div className="signal-card"><span className="signal-label">AI learning signal</span><div className="signal-bars"><i /><i /><i /><i /><i /><i /><i /><i /></div><small>adaptive path · online</small></div>
-          <div className="dashboard-card main-card"><div className="card-top"><span className="live-pill">● Live learning</span><span>•••</span></div><p>Ton prochain<br /><strong>super-pouvoir</strong></p><div className="progress"><span /></div><small>72% de ton parcours</small></div>
-          <div className="float-card course-card"><span className="tiny-icon">✦</span><div><small>Module en cours</small><strong>AI Essentials</strong></div><span>→</span></div>
-          <div className="float-card growth-card"><span className="growth-number">+48%</span><small>de confiance<br />après 4 semaines</small></div>
-          <div className="floating-dot dot-one" /><div className="floating-dot dot-two" />
-        </div>
+        <div className="hero-visual hero-student" role="img" aria-label="Étudiante travaillant sur son ordinateur, entourée de livres" />
         <div className="hero-scroll">Scroll to explore <span>↓</span></div>
       </section>
 
