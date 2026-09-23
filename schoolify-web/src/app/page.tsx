@@ -34,7 +34,21 @@ export default function Home() {
         <div className="hero-scroll">Scroll to explore <span>↓</span></div>
       </section>
 
-      <section className="partner-strip" aria-label="Partenaires Schoolify"><span>Ils croient au potentiel de la nouvelle génération</span><div><strong>mastercard</strong><strong>startup<span>station</span></strong><strong>HEDERA</strong></div></section>
+      <section className="partner-strip" aria-label="Partenaires Schoolify">
+        <div className="partner-marquee">
+          {[0, 1].map((group) => (
+            <div className="partner-logos" key={group} aria-hidden={group !== 0}>
+              {Array.from({ length: 4 }, (_, i) => (
+                <div className="partner-set" key={i}>
+                  <img src="/mastercard.webp" alt={group === 0 && i === 0 ? "Mastercard" : ""} />
+                  <img src="/LSS.webp" alt={group === 0 && i === 0 ? "LaStartupStation" : ""} />
+                  <strong>HEDERA</strong>
+                </div>
+              ))}
+            </div>
+          ))}
+        </div>
+      </section>
 
       <section className="intro-section"><div className="section-shell">
         <Reveal><div className="section-kicker">Notre mission</div><div className="intro-layout"><h2>Le digital change.<br /><em>Tu peux mener le changement.</em></h2><div><p>Schoolify est une E-dTech qui rend les compétences émergentes compréhensibles, pratiques et réellement accessibles. Ici, tu ne collectionnes pas des cours : tu construis une trajectoire.</p><Link className="arrow-link" href="/signup">Faire le premier pas <span>↗</span></Link></div></div></Reveal>
@@ -50,8 +64,7 @@ export default function Home() {
       <section className="quote-section section-shell"><div className="quote-glow" /><p>“Je ne savais pas par où commencer dans la tech. Schoolify m’a donné une direction — et surtout la confiance de continuer.”</p><div><span className="quote-avatar">NK</span><span><strong>Nour K.</strong><small>Apprenante, Casablanca</small></span></div></section>
 
       <section className="final-cta"><div className="cta-noise" /><div className="section-shell"><span className="cta-symbol">✦</span><h2>Le futur ne s’attend pas.<br /><em>Il s’apprend.</em></h2><p>Ton premier module est à quelques clics.</p><Link className="button button-light button-large" href="/signup">Start learning <span>→</span></Link></div></section>
-      <footer className="site-footer"><div className="section-shell"><span className="footer-brand">schoolify<span>✦</span></span><p>Les talents de demain commencent ici.</p><span>© 2026 Schoolify E-dTech</span></div></footer>
-      <ChatWidget />
+      <ChatWidget/>
     </main>
   );
 }

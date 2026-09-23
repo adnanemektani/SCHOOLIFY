@@ -4,7 +4,7 @@ export function Brand({ compact = false }: { compact?: boolean }) {
   return (
     <Link className="brand" href="/" aria-label="Schoolify accueil">
       <span className="brand-mark"><img src="/schoolify-mark.svg" alt="" /></span>
-      {!compact && <span>schoolify<span className="brand-star">✦</span></span>}
+      {!compact && <span>schoolify</span>}
     </Link>
   );
 }
