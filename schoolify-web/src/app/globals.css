@@ -308,4 +308,16 @@ main {
    footer's .section-shell, forcing footer-top/footer-bottom into a flex row instead
    of stacking. Higher-specificity reset so the new footer's own grid/flex rules apply. */
 .site-footer>.section-shell{display:block}
+
+/* Chat widget now opens as a vaul Drawer (slides in from the right) instead of a
+   floating popup; the inner content classes (chat-panel-head, chat-messages,
+   quick-replies, chat-input) are unchanged and keep their existing styling. */
+.chat-drawer-overlay{position:fixed;inset:0;z-index:29;background:rgba(3,8,15,.55)}
+.chat-drawer{position:fixed;top:0;right:0;bottom:0;z-index:30;display:flex;flex-direction:column;width:min(380px,100vw);background:#0c1725;border-left:1px solid rgba(186,233,255,.23);box-shadow:0 25px 70px rgba(0,0,0,.45);outline:0}
+.chat-drawer-handle{width:38px;height:4px;margin:12px auto 0;border-radius:99px;background:rgba(186,233,255,.25);flex-shrink:0}
+.chat-drawer .chat-panel-head{flex-shrink:0}
+.chat-drawer .chat-messages{flex:1;max-height:none}
+.chat-drawer .chat-input{flex-shrink:0}
+.chat-close{margin-left:auto;border:0;background:transparent;color:#fff;font-size:22px;line-height:1;cursor:pointer}
+@media(max-width:640px){.chat-drawer{width:100vw}}
   
