@@ -1,8 +1,9 @@
 import bcrypt from "bcryptjs";
 import { NextRequest, NextResponse } from "next/server";
 import { sendRegistrationEmails } from "@/lib/mail";
+import { isEmailDomainValid } from "@/lib/email-domain";
 import { notifyNewUser } from "@/lib/integrations";
-import { hashToken, isRateLimited, makeToken, setSession } from "@/lib/security";
+import { hashToken, isRateLimited, makeToken } from "@/lib/security";
 import { User } from "@/lib/types";
 import { createUser, findUserByEmail } from "@/lib/users";
 import { registrationSchema } from "@/lib/validation";
@@ -19,6 +20,7 @@ export async function POST(request: NextRequest) {
   if (!parsed.success) return NextResponse.json({ message: parsed.error.issues[0]?.message ?? "Données invalides." }, { status: 400 });
   const input = parsed.data;
   if (await findUserByEmail(input.email)) return NextResponse.json({ message: "Un compte existe déjà avec cet email." }, { status: 409 });
+  if (!(await isEmailDomainValid(input.email))) return NextResponse.json({ message: "Cette adresse email semble invalide ou inexistante." }, { status: 400 });
 
   const verificationToken = makeToken();
   const user: User = {
@@ -41,7 +43,6 @@ export async function POST(request: NextRequest) {
 
   const mail = await sendRegistrationEmails(user.firstName, user.email, verificationToken).catch(() => ({ delivered: false }));
   await notifyNewUser(user).catch((error) => console.error("[integration] user.created failed", error));
-  await setSession(user.id);
   return NextResponse.json({ ok: true, verificationSent: mail.delivered });
   } catch (error) {
     console.error("[register] failed", error);

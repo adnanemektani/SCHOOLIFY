@@ -1,0 +1,40 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Gender {
+  female
+  male
+  prefer_not_to_say @map("prefer-not-to-say")
+}
+
+enum Residence {
+  urban
+  rural
+}
+
+model User {
+  id                     String    @id @default(uuid())
+  firstName              String
+  lastName               String
+  email                  String    @unique
+  passwordHash           String
+  gender                 Gender
+  dateOfBirth            DateTime  @db.Date
+  country                String
+  region                 String
+  residence              Residence
+  verified               Boolean   @default(false)
+  verificationTokenHash  String?
+  verificationExpiresAt  DateTime?
+  resetTokenHash         String?
+  resetExpiresAt         DateTime?
+  createdAt              DateTime  @default(now())
+
+  @@map("users")
+}

@@ -13,6 +13,9 @@ export async function POST(request: NextRequest) {
   if (!user || !(await bcrypt.compare(parsed.data.password, user.passwordHash))) {
     return NextResponse.json({ message: "Email ou mot de passe incorrect." }, { status: 401 });
   }
+  if (!user.verified) {
+    return NextResponse.json({ message: "Confirmez votre email avant de vous connecter. Vérifiez votre boîte de réception." }, { status: 403 });
+  }
   await setSession(user.id);
   return NextResponse.json({ ok: true });
 }
