@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 export default function SiteFooter() {
     const year = new Date().getFullYear();
   
@@ -7,9 +9,9 @@ export default function SiteFooter() {
           <div className="footer-top">
             {/* Marque */}
             <div className="footer-brand-col">
-              <a href="/" className="footer-brand" aria-label="Schoolify — accueil">
+              <Link href="/" className="footer-brand" aria-label="Schoolify — accueil">
                 schoolify
-              </a>
+              </Link>
               <p className="footer-tagline">
                 Les talents de demain commencent ici.
               </p>
