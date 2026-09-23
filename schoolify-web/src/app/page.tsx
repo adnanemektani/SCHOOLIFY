@@ -4,9 +4,9 @@ import { SiteHeader } from "@/components/brand";
 import { Reveal } from "@/components/reveal";
 
 const tracks = [
-  { icon: "◈", title: "Web3 & Blockchain", text: "Comprendre, construire et faire évoluer les nouveaux usages du web." },
-  { icon: "✦", title: "Intelligence artificielle", text: "Maîtriser les outils et les méthodes qui transforment les métiers." },
-  { icon: "↗", title: "Digital business", text: "Passer d’une idée à un projet concret, utile et durable." },
+  { title: "Web3 & Blockchain", text: "Comprendre, construire et faire évoluer les nouveaux usages du web." },
+  { title: "Intelligence artificielle", text: "Maîtriser les outils et les méthodes qui transforment les métiers." },
+  { title: "Digital business", text: "Passer d’une idée à un projet concret, utile et durable." },
 ];
 
 const jobs = ["Web3 Project Manager", "Blockchain Developer", "AI Content Strategist", "Data & AI Analyst", "Community Builder", "Product Designer"];
@@ -41,7 +41,7 @@ export default function Home() {
         <Reveal className="reveal-2"><div className="stats-row"><div><strong>92<sup>%</sup></strong><span>de nos apprenants se sentent prêts à appliquer leurs acquis</span></div><div><strong>18</strong><span>modules pratiques pour apprendre à ton rythme</span></div><div><strong>1</strong><span>communauté qui avance à tes côtés</span></div></div></Reveal>
       </div></section>
 
-      <section id="programmes" className="tracks-section"><div className="section-shell"><div className="section-kicker">Explorer</div><div className="heading-row"><h2>Choisis le terrain<br />où tu veux <em>briller.</em></h2><p>Des parcours conçus autour des compétences recherchées, avec une vraie place pour la pratique.</p></div><div className="track-grid">{tracks.map((track, index) => <article className={`track-card track-${index + 1}`} key={track.title}><span className="track-number">0{index + 1}</span><div className="track-symbol">{track.icon}</div><h3>{track.title}</h3><p>{track.text}</p><Link href="/signup" aria-label={`Découvrir ${track.title}`}>↗</Link></article>)}</div></div></section>
+      <section id="programmes" className="tracks-section"><div className="section-shell"><div className="section-kicker">Explorer</div><div className="heading-row"><h2>Choisis le terrain<br />où tu veux <em>briller.</em></h2><p>Des parcours conçus autour des compétences recherchées, avec une vraie place pour la pratique.</p></div><div className="track-grid">{tracks.map((track) => <article className="track-card" key={track.title}><div className="track-card-content"><h3>{track.title}</h3><p>{track.text}</p></div></article>)}</div></div></section>
 
       <section id="metiers" className="jobs-section section-shell"><div className="jobs-copy"><div className="section-kicker">Des opportunités réelles</div><h2>Ta curiosité<br />peut devenir un <em>métier.</em></h2><p>Le Web3 et l’IA ont besoin de profils divers : créatifs, analytiques, organisés, visionnaires. Peut-être le tien.</p><Link className="button button-outline" href="/signup">Explorer les parcours <span>→</span></Link></div><div className="jobs-list">{jobs.map((job, index) => <div key={job}><span>0{index + 1}</span><strong>{job}</strong><i>↗</i></div>)}</div></section>
 
