@@ -1,6 +1,13 @@
 "use client";
 
-import { FormEvent, useEffect, useRef, useState } from "react";
+import {
+  FormEvent,
+  type KeyboardEvent as ReactKeyboardEvent,
+  type PointerEvent as ReactPointerEvent,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import { Drawer } from "vaul";
 
 type Message = { role: "bot" | "user"; content: string };
@@ -10,6 +17,10 @@ const QUICK_REPLIES = [
   "Comment ça marche ?",
   "Je veux parler à l’équipe",
 ] as const;
+
+const MIN_PANEL_WIDTH = 320;
+const MAX_PANEL_WIDTH = 600;
+const MAX_PANEL_VIEWPORT_RATIO = 0.65;
 
 function localReply(question: string) {
   const q = question.toLowerCase();
@@ -33,12 +44,111 @@ export function ChatWidget() {
     { role: "bot", content: "Salam 👋 Je suis là pour t’aider à choisir ton parcours Web3 ou IA." },
   ]);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const panelRef = useRef<HTMLDivElement>(null);
+  const resizeStateRef = useRef<{
+    pointerId: number;
+    startX: number;
+    startWidth: number;
+    minWidth: number;
+    maxWidth: number;
+  } | null>(null);
+  const previousBodyStylesRef = useRef<{ cursor: string; userSelect: string } | null>(null);
   const apiConnected = Boolean(process.env.NEXT_PUBLIC_CHATBOT_API_URL);
 
   useEffect(() => {
     if (!open) return;
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
   }, [messages, sending, open]);
+
+  useEffect(() => {
+    return () => {
+      resizeStateRef.current = null;
+      if (previousBodyStylesRef.current) {
+        document.body.style.cursor = previousBodyStylesRef.current.cursor;
+        document.body.style.userSelect = previousBodyStylesRef.current.userSelect;
+      }
+    };
+  }, []);
+
+  function getResizeBounds() {
+    const maxWidth = Math.min(MAX_PANEL_WIDTH, window.innerWidth * MAX_PANEL_VIEWPORT_RATIO);
+    return { minWidth: Math.min(MIN_PANEL_WIDTH, maxWidth), maxWidth };
+  }
+
+  function setPanelWidth(width: number) {
+    const panel = panelRef.current;
+    if (!panel) return;
+
+    const { minWidth, maxWidth } = getResizeBounds();
+    const nextWidth = Math.min(maxWidth, Math.max(minWidth, width));
+    panel.style.setProperty("--chat-panel-width", `${Math.round(nextWidth)}px`);
+  }
+
+  function restoreBodyStyles() {
+    if (!previousBodyStylesRef.current) return;
+    document.body.style.cursor = previousBodyStylesRef.current.cursor;
+    document.body.style.userSelect = previousBodyStylesRef.current.userSelect;
+    previousBodyStylesRef.current = null;
+  }
+
+  function startResize(event: ReactPointerEvent<HTMLDivElement>) {
+    if (resizeStateRef.current || window.matchMedia("(max-width: 640px)").matches) return;
+
+    const panel = panelRef.current;
+    if (!panel) return;
+
+    const { minWidth, maxWidth } = getResizeBounds();
+    resizeStateRef.current = {
+      pointerId: event.pointerId,
+      startX: event.clientX,
+      startWidth: panel.getBoundingClientRect().width,
+      minWidth,
+      maxWidth,
+    };
+    previousBodyStylesRef.current = {
+      cursor: document.body.style.cursor,
+      userSelect: document.body.style.userSelect,
+    };
+
+    panel.dataset.resizing = "true";
+    document.body.style.cursor = "ew-resize";
+    document.body.style.userSelect = "none";
+    event.currentTarget.setPointerCapture(event.pointerId);
+    event.preventDefault();
+  }
+
+  function moveResize(event: ReactPointerEvent<HTMLDivElement>) {
+    const resizeState = resizeStateRef.current;
+    if (!resizeState || resizeState.pointerId !== event.pointerId) return;
+
+    const nextWidth = resizeState.startWidth + resizeState.startX - event.clientX;
+    setPanelWidth(Math.min(resizeState.maxWidth, Math.max(resizeState.minWidth, nextWidth)));
+  }
+
+  function finishResize(event?: ReactPointerEvent<HTMLDivElement>) {
+    const resizeState = resizeStateRef.current;
+    resizeStateRef.current = null;
+
+    if (event && resizeState && event.currentTarget.hasPointerCapture(resizeState.pointerId)) {
+      event.currentTarget.releasePointerCapture(resizeState.pointerId);
+    }
+
+    panelRef.current?.removeAttribute("data-resizing");
+    restoreBodyStyles();
+  }
+
+  function resizeWithKeyboard(event: ReactKeyboardEvent<HTMLDivElement>) {
+    if (event.key !== "ArrowLeft" && event.key !== "ArrowRight") return;
+
+    const panel = panelRef.current;
+    if (!panel) return;
+
+    const step = event.shiftKey ? 50 : 20;
+    const direction = event.key === "ArrowLeft" ? 1 : -1;
+    setPanelWidth(panel.getBoundingClientRect().width + step * direction);
+    event.preventDefault();
+    event.stopPropagation();
+  }
 
   async function sendMessage(event?: FormEvent<HTMLFormElement>, preset?: string) {
     event?.preventDefault();
@@ -94,8 +204,27 @@ export function ChatWidget() {
 
       <Drawer.Portal>
         <Drawer.Overlay className="chat-drawer-overlay" />
-        <Drawer.Content className="chat-drawer" aria-describedby={undefined}>
+        <Drawer.Content
+          ref={panelRef}
+          id="schoolify-chat-panel"
+          className="chat-drawer"
+          aria-describedby={undefined}
+        >
           <div className="chat-drawer-handle" aria-hidden="true" />
+          <div
+            className="chat-resize-handle"
+            role="separator"
+            aria-label="Redimensionner le chatbot"
+            aria-orientation="vertical"
+            tabIndex={0}
+            data-vaul-no-drag
+            onPointerDown={startResize}
+            onPointerMove={moveResize}
+            onPointerUp={finishResize}
+            onPointerCancel={finishResize}
+            onLostPointerCapture={finishResize}
+            onKeyDown={resizeWithKeyboard}
+          />
 
           <div className="chat-panel-head">
             <span className="chat-avatar">✦</span>
