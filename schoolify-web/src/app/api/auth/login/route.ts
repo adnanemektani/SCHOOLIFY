@@ -1,7 +1,8 @@
 import bcrypt from "bcryptjs";
 import { NextRequest, NextResponse } from "next/server";
-import { isRateLimited, setSession } from "@/lib/security";
-import { findUserByEmail } from "@/lib/users";
+import { sendVerificationEmail } from "@/lib/mail";
+import { hashToken, isRateLimited, makeToken, setSession } from "@/lib/security";
+import { findUserByEmail, updateUser } from "@/lib/users";
 import { loginSchema } from "@/lib/validation";
 
 export async function POST(request: NextRequest) {
@@ -14,7 +15,13 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ message: "Email ou mot de passe incorrect." }, { status: 401 });
   }
   if (!user.verified) {
-    return NextResponse.json({ message: "Confirmez votre email avant de vous connecter. Vérifiez votre boîte de réception." }, { status: 403 });
+    const verificationToken = makeToken();
+    await updateUser(user.id, {
+      verificationTokenHash: hashToken(verificationToken),
+      verificationExpiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
+    });
+    await sendVerificationEmail(user.firstName, user.email, verificationToken).catch((error) => console.error("[login] verification email failed", error));
+    return NextResponse.json({ message: "Votre email n'est pas encore confirmé. Nous venons de vous renvoyer un lien de confirmation : vérifiez votre boîte de réception." }, { status: 403 });
   }
   await setSession(user.id);
   return NextResponse.json({ ok: true });

@@ -7,6 +7,10 @@ async function sendEmail(message: Mail) {
   const from = process.env.EMAIL_FROM;
   if (!key || !from) {
     console.info(`[mail:preview] ${message.subject} → ${message.to}`);
+    if (process.env.NODE_ENV !== "production") {
+      const links = [...message.html.matchAll(/href="([^"]+)"/g)].map((match) => match[1]);
+      for (const link of links) console.info(`[mail:preview] link: ${link}`);
+    }
     return { delivered: false };
   }
   const response = await fetch("https://api.resend.com/emails", {
@@ -20,13 +24,17 @@ async function sendEmail(message: Mail) {
 
 const appUrl = () => (process.env.APP_URL || "http://localhost:3000").replace(/\/$/, "");
 
-export async function sendRegistrationEmails(firstName: string, email: string, token: string) {
+export async function sendVerificationEmail(firstName: string, email: string, token: string) {
   const verificationUrl = `${appUrl()}/verify-email?token=${encodeURIComponent(token)}`;
-  const confirmation = await sendEmail({
+  return sendEmail({
     to: email,
     subject: "Bienvenue chez Schoolify — confirmez votre email",
     html: `<h1>Bienvenue ${firstName} !</h1><p>Votre compte Schoolify a été créé avec succès.</p><p><a href="${verificationUrl}">Confirmer mon email</a></p><p>Ce lien expire dans 24 heures.</p>`,
   });
+}
+
+export async function sendRegistrationEmails(firstName: string, email: string, token: string) {
+  const confirmation = await sendVerificationEmail(firstName, email, token);
   const notify = process.env.STARTUP_NOTIFICATION_EMAIL
     ? sendEmail({
         to: process.env.STARTUP_NOTIFICATION_EMAIL,
