@@ -9,6 +9,7 @@ client = OpenAI(
     timeout=30
 )
 
+
 def chat_completion(messages):
     print(f"Calling LLM API ({Config.MODEL_NAME})...", flush=True)
 

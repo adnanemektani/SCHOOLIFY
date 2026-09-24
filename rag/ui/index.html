@@ -3,77 +3,153 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="theme-color" content="#03060c" />
-    <title>Schoolify RAG Lab</title>
-    <link rel="stylesheet" href="/test-ui/styles.css" />
+    <meta name="theme-color" content="#0d0d0d" />
+    <title>Schoolify · RAG</title>
+    <link rel="stylesheet" href="/test-ui/styles.css?v=20260924-chatgpt" />
   </head>
   <body>
-    <div class="app-shell">
-      <header class="topbar">
-        <a class="brand" href="/test" aria-label="Schoolify RAG Lab">
-          <span class="brand-mark">✦</span>
-          <span>schoolify <b>/ rag lab</b></span>
-        </a>
-        <div class="topbar-actions">
-          <span id="service-status" class="status-pill status-loading">Connexion…</span>
-          <a class="ghost-link" href="/docs" target="_blank" rel="noreferrer">API docs ↗</a>
+    <div class="app-shell" id="app-shell">
+      <button class="mobile-menu icon-button" id="mobile-menu" type="button" aria-label="Ouvrir le menu" aria-expanded="false">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16" /></svg>
+      </button>
+      <div class="sidebar-backdrop" id="sidebar-backdrop" aria-hidden="true"></div>
+
+      <aside class="sidebar" id="sidebar" aria-label="Navigation principale">
+        <div class="sidebar-header">
+          <a class="brand" href="/test" aria-label="Schoolify RAG">
+            <img src="/test-ui/schoolify-logo.svg" alt="Schoolify" />
+          </a>
+          <button class="icon-button sidebar-toggle" id="sidebar-toggle" type="button" aria-label="Réduire la barre latérale" aria-expanded="true">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="4" width="16" height="16" rx="3" /><path d="M9 4v16" /></svg>
+          </button>
         </div>
-      </header>
 
-      <main>
-        <section class="hero">
-          <div class="hero-copy">
-            <span class="eyebrow"><i></i> Test environment</span>
-            <h1>Teste ton<br /><em>laboratoire d’étude.</em></h1>
-            <p>Pose une question, vérifie les sources et ajoute tes propres supports. Cette page utilise directement le service RAG, sans passer par l’interface Next.js.</p>
-          </div>
-          <div class="hero-orbit" aria-hidden="true">
-            <div class="orbit orbit-one"></div>
-            <div class="orbit orbit-two"></div>
-            <div class="orbit-core">✦</div>
-            <span class="orbit-dot dot-one"></span>
-            <span class="orbit-dot dot-two"></span>
-          </div>
-        </section>
+        <button class="new-chat-button" id="new-chat" type="button">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14" /></svg>
+          <span>New chat</span>
+          <kbd>⌘ K</kbd>
+        </button>
 
-        <section class="workspace" aria-label="RAG test workspace">
-          <aside class="control-panel panel">
-            <div class="panel-heading">
-              <span class="panel-kicker">01 / Question</span>
-              <h2>Que veux-tu comprendre ?</h2>
+        <div class="sidebar-scroll">
+          <nav class="primary-nav" aria-label="Sections">
+            <a class="nav-item active" href="#conversation" data-nav="conversation">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 5.5A2.5 2.5 0 0 1 7.5 3H19v15H7.5A2.5 2.5 0 0 0 5 20.5v-15Z" /><path d="M5 20.5A2.5 2.5 0 0 1 7.5 18H19M9 7h6M9 10h4" /></svg>
+              <span>New chat</span>
+            </a>
+            <a class="nav-item" href="#knowledge-sidebar" data-nav="library">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 5.5A2.5 2.5 0 0 1 7.5 3H19v15H7.5A2.5 2.5 0 0 0 5 20.5v-15Z" /><path d="M5 20.5A2.5 2.5 0 0 1 7.5 18H19" /></svg>
+              <span>Library</span>
+            </a>
+            <a class="nav-item" href="#knowledge-sidebar" data-nav="images">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="4" width="16" height="16" rx="3" /><circle cx="9" cy="9" r="1.5" /><path d="m5 17 4-4 3 3 2-2 5 4" /></svg>
+              <span>Images</span>
+            </a>
+            <a class="nav-item" href="#study-settings" data-nav="tools">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v18M3 12h18M5.6 5.6l12.8 12.8M18.4 5.6 5.6 18.4" /><circle cx="12" cy="12" r="8.5" /></svg>
+              <span>Study tools</span>
+            </a>
+          </nav>
+
+          <div class="sidebar-rule"></div>
+
+          <section class="history-section" aria-labelledby="history-title">
+            <div class="section-label" id="history-title">
+              <span>Your chats</span>
+              <button class="text-icon-button" id="clear-history" type="button" aria-label="Effacer l’historique" title="Effacer l’historique">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 7h14M10 11v5M14 11v5M7 7l1 13h8l1-13M9 7l1-3h4l1 3" /></svg>
+              </button>
             </div>
-            <form id="ask-form">
-              <label class="field-label" for="question">Ta question</label>
-              <textarea id="question" name="question" rows="5" maxlength="4000" required placeholder="Ex. Explique-moi le RAG avec un exemple simple…"></textarea>
-              <div class="control-grid">
-                <label>Mode<select id="mode"><option value="explain">Expliquer</option><option value="summarize">Résumer</option><option value="quiz">Quiz</option><option value="plan">Planifier</option></select></label>
-                <label>Niveau<select id="level"><option value="decouvre">Débutant</option><option value="intermediaire" selected>Intermédiaire</option><option value="avance">Avancé</option></select></label>
-                <label class="subject-field">Sujet<input id="subject" maxlength="120" placeholder="IA, Web3…" /></label>
+            <div class="chat-history" id="chat-history">
+              <div class="history-empty">Your conversations will appear here.</div>
+            </div>
+          </section>
+
+          <section class="knowledge-sidebar" id="knowledge-sidebar" aria-labelledby="knowledge-title">
+            <div class="section-label" id="knowledge-title">
+              <span>Knowledge base</span>
+              <span class="limit-label" id="upload-limit">20 MB</span>
+            </div>
+            <label class="drop-zone" id="drop-zone" for="course-file">
+              <span class="drop-zone-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24"><path d="M12 16V5M8 9l4-4 4 4M5 15v3a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-3" /></svg>
+              </span>
+              <span class="drop-zone-copy"><strong>Add a file</strong><small>or drop it here</small></span>
+              <input id="course-file" type="file" accept=".md,.txt,.pdf,text/markdown,text/plain,application/pdf" />
+            </label>
+            <div class="upload-actions">
+              <button id="upload-button" class="sidebar-button primary" type="button" disabled>Index file</button>
+              <button id="reindex-button" class="sidebar-button" type="button">Reindex all</button>
+            </div>
+            <div id="upload-status" class="inline-status" role="status" aria-live="polite"></div>
+            <div id="file-list" class="file-list"></div>
+          </section>
+
+          <details class="sidebar-settings" id="study-settings">
+            <summary>
+              <span class="summary-title">Study settings</span>
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m8 10 4 4 4-4" /></svg>
+            </summary>
+            <div class="settings-content">
+              <label class="setting-field">Mode
+                <select id="mode">
+                  <option value="explain">Explain</option>
+                  <option value="summarize">Summarize</option>
+                  <option value="quiz">Quiz</option>
+                  <option value="plan">Plan</option>
+                </select>
+              </label>
+              <label class="setting-field">Level
+                <select id="level">
+                  <option value="decover">Beginner</option>
+                  <option value="intermediaire" selected>Intermediate</option>
+                  <option value="avance">Advanced</option>
+                </select>
+              </label>
+              <label class="setting-field setting-wide">Subject
+                <input id="subject" maxlength="120" placeholder="AI, Web3…" />
+              </label>
+              <label class="toggle-row"><input id="graph-toggle" type="checkbox" checked /><span class="toggle-control"></span><span>Show concept map</span></label>
+              <label class="setting-field setting-wide">Service key <span class="optional-label">optional</span>
+                <input id="service-key" type="password" autocomplete="off" placeholder="X-RAG-API-Key" />
+              </label>
+            </div>
+          </details>
+        </div>
+      </aside>
+
+      <main class="main-content" id="conversation">
+        <header class="main-topbar">
+          <div class="model-switcher" role="group" aria-label="Workspace mode">
+            <button class="model-option active" type="button">Chat</button>
+            <button class="model-option" type="button">Workspace</button>
+          </div>
+          <div class="topbar-actions">
+            <span id="service-status" class="service-status status-loading">Connecting…</span>
+            <a class="topbar-link" href="/docs" target="_blank" rel="noreferrer">API docs <span aria-hidden="true">↗</span></a>
+            <button class="icon-button topbar-icon" type="button" aria-label="Options">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8" /><path d="M12 8v4l2.5 2" /></svg>
+            </button>
+          </div>
+        </header>
+
+        <div class="conversation-scroll" id="conversation-scroll">
+          <div class="conversation-column">
+            <section class="welcome-state" id="empty-state">
+              <div class="welcome-mark" aria-hidden="true">
+                <img src="/test-ui/schoolify-logo.svg" alt="" />
               </div>
-              <label class="toggle-row"><input id="graph-toggle" type="checkbox" checked /><span class="toggle-control"></span><span>Afficher la carte de concepts</span></label>
-              <button id="ask-button" class="primary-button" type="submit">Lancer l’étude <b>→</b></button>
-            </form>
-            <div class="suggestions">
-              <span>Essayer</span>
-              <button type="button" data-question="Explique-moi la différence entre active recall et reread">Active recall</button>
-              <button type="button" data-question="Donne-moi un plan de révision pour l’IA générative">Plan d’IA</button>
-              <button type="button" data-question="Fais-moi un quiz court sur les bases de Web3">Quiz Web3</button>
-            </div>
-            <div id="ask-status" class="inline-status" role="status" aria-live="polite"></div>
-          </aside>
+              <h1>Hey, ready to dive in?</h1>
+              <p>Ask anything about your learning materials and get grounded answers with sources.</p>
+            </section>
 
-          <section class="results-panel" aria-live="polite">
-            <div id="empty-state" class="empty-state">
-              <div class="empty-icon">✦</div>
-              <h2>Ton espace de réponse apparaîtra ici.</h2>
-              <p>Les sources, la carte de concepts et la voix ElevenLabs seront vérifiables depuis cette page.</p>
-            </div>
-
-            <article id="answer-card" class="answer-card panel" hidden>
+            <article id="answer-card" class="answer-card" hidden>
               <div class="answer-heading">
-                <div><span class="panel-kicker">02 / Réponse</span><h2>Une façon de l’aborder</h2></div>
+                <div>
+                  <span class="content-label">Schoolify answer</span>
+                  <h2>Here’s a way to approach it</h2>
+                </div>
                 <div class="answer-actions">
-                  <button id="speak-button" class="secondary-button" type="button" hidden>Écouter ↗</button>
+                  <button id="speak-button" class="outline-button" type="button" hidden>Listen <span aria-hidden="true">↗</span></button>
                   <audio id="answer-audio" controls hidden></audio>
                 </div>
               </div>
@@ -81,50 +157,63 @@
               <div class="answer-footer"><span id="answer-mode"></span><span id="answer-runtime"></span></div>
             </article>
 
-            <article id="graph-card" class="graph-card panel" hidden>
-              <div class="card-heading"><div><span class="panel-kicker">Visuel</span><h2 id="graph-title">Carte de compréhension</h2></div><span id="graph-count" class="count-badge"></span></div>
+            <article id="graph-card" class="content-card graph-card" hidden>
+              <div class="card-heading">
+                <div><span class="content-label">Visual map</span><h2 id="graph-title">Concept map</h2></div>
+                <span id="graph-count" class="count-badge"></span>
+              </div>
               <div id="graph-canvas" class="graph-canvas"></div>
-              <div class="graph-legend"><span><i class="topic-dot"></i> Thème</span><span><i class="concept-dot"></i> Concept</span><span><i class="practice-dot"></i> Pratique</span></div>
+              <div class="graph-legend"><span><i class="topic-dot"></i> Theme</span><span><i class="concept-dot"></i> Concept</span><span><i class="practice-dot"></i> Practice</span></div>
             </article>
 
-            <article id="sources-card" class="sources-card panel" hidden>
-              <div class="card-heading"><div><span class="panel-kicker">03 / Sources</span><h2>Vérifie les passages</h2></div><span id="source-count" class="count-badge"></span></div>
+            <article id="sources-card" class="content-card sources-card" hidden>
+              <div class="card-heading">
+                <div><span class="content-label">Grounding</span><h2>Sources</h2></div>
+                <span id="source-count" class="count-badge"></span>
+              </div>
               <div id="sources-list" class="sources-list"></div>
             </article>
-          </section>
-        </section>
-
-        <section class="knowledge-section panel">
-          <div class="knowledge-copy">
-            <span class="panel-kicker">04 / Knowledge loader</span>
-            <h2>Ajoute tes supports</h2>
-            <p>Dépose un fichier Markdown, texte ou PDF. Il sera sauvegardé dans le volume Docker puis indexé dans PostgreSQL/pgvector.</p>
-            <div class="upload-rule"><span>Formats</span><strong>.md · .txt · .pdf</strong><span>Limite</span><strong id="upload-limit">20 MB</strong></div>
           </div>
-          <div class="upload-panel">
-            <label id="drop-zone" class="drop-zone" for="course-file">
-              <span class="upload-icon">↑</span>
-              <strong>Choisis un fichier</strong>
-              <small>ou glisse-le ici</small>
-              <input id="course-file" type="file" accept=".md,.txt,.pdf,text/markdown,text/plain,application/pdf" />
-            </label>
-            <div class="upload-actions">
-              <button id="upload-button" class="primary-button" type="button" disabled>Indexer le support</button>
-              <button id="reindex-button" class="secondary-button" type="button">Réindexer tout</button>
+        </div>
+
+        <div class="composer-region">
+          <form id="ask-form" class="composer-form">
+            <div class="composer-bar">
+              <button class="composer-icon-button" id="composer-upload" type="button" aria-label="Add an attachment" title="Add an attachment">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14" /></svg>
+              </button>
+              <label class="sr-only" for="question">Ask anything</label>
+              <textarea id="question" name="question" rows="1" maxlength="4000" required placeholder="Ask anything"></textarea>
+              <div class="composer-actions">
+                <button class="composer-action-button" type="button" aria-label="Think mode" title="Think mode">
+                  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 4h6M10 4v5l-4.5 8.2A2.2 2.2 0 0 0 7.4 20h9.2a2.2 2.2 0 0 0 1.9-2.8L14 9V4M8 15h8" /></svg>
+                  <span>Think</span>
+                </button>
+                <button class="composer-icon-button voice-button" type="button" aria-label="Voice input" title="Voice input">
+                  <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3" /><path d="M5 11a7 7 0 0 0 14 0M12 18v3M9 21h6" /></svg>
+                </button>
+                <button id="ask-button" class="send-button" type="submit" aria-label="Send message">
+                  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h13M13 6l6 6-6 6" /></svg>
+                </button>
+              </div>
             </div>
-            <div id="upload-status" class="inline-status" role="status" aria-live="polite"></div>
-            <div id="file-list" class="file-list"></div>
-          </div>
-        </section>
-
-        <section class="settings-strip">
-          <div><span class="panel-kicker">Optional</span><strong>Service key</strong><p>Only needed when <code>RAG_API_KEY</code> is enabled.</p></div>
-          <label class="key-input"><span class="sr-only">RAG service key</span><input id="service-key" type="password" autocomplete="off" placeholder="X-RAG-API-Key" /></label>
-        </section>
+            <div class="composer-status-row">
+              <div class="quick-actions" aria-label="Suggested prompts">
+                <button type="button" data-question="Explain the difference between active recall and rereading">
+                  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m4 16 8-8 8 8M8 20h8M6 4h12" /></svg>
+                  Write or edit
+                </button>
+                <button type="button" data-question="Search my learning materials for the most important Web3 concepts">
+                  <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6" /><path d="m16 16 4 4M11 8v6M8 11h6" /></svg>
+                  Search the web
+                </button>
+              </div>
+              <div id="ask-status" class="inline-status" role="status" aria-live="polite"></div>
+            </div>
+          </form>
+        </div>
       </main>
-
-      <footer class="footer"><span>Schoolify RAG Lab</span><span>FastAPI · LangChain · pgvector · ElevenLabs</span></footer>
     </div>
-    <script src="/test-ui/app.js" defer></script>
+    <script src="/test-ui/app.js?v=20260924-chatgpt" defer></script>
   </body>
 </html>

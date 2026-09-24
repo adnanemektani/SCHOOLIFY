@@ -3,6 +3,9 @@ const SVG_NS = 'http://www.w3.org/2000/svg';
 
 const state = {
   history: [],
+  sessions: [],
+  activeSessionId: null,
+  nextSessionId: 1,
   lastAnswer: '',
   audioUrl: '',
   graph: null,
@@ -24,6 +27,14 @@ const fileList = $('#file-list');
 const serviceKeyInput = $('#service-key');
 const audio = $('#answer-audio');
 const speakButton = $('#speak-button');
+const appShell = $('#app-shell');
+const chatHistory = $('#chat-history');
+const newChatButton = $('#new-chat');
+const clearHistoryButton = $('#clear-history');
+const sidebarToggle = $('#sidebar-toggle');
+const mobileMenu = $('#mobile-menu');
+const sidebarBackdrop = $('#sidebar-backdrop');
+const composerUpload = $('#composer-upload');
 
 function setStatus(element, message = '', kind = '') {
   element.textContent = message;
@@ -58,6 +69,7 @@ async function requestJson(path, options = {}) {
 
 function setLoading(button, loading, loadingLabel = 'Traitement…') {
   if (!button) return;
+  button.classList.toggle('is-loading', loading);
   if (loading) {
     button.dataset.originalLabel = button.innerHTML;
     button.textContent = loadingLabel;
@@ -71,6 +83,108 @@ function setLoading(button, loading, loadingLabel = 'Traitement…') {
 function showCard(card) {
   card.hidden = false;
   $('#empty-state').hidden = true;
+}
+
+function resetResponse() {
+  answerCard.hidden = true;
+  graphCard.hidden = true;
+  sourcesCard.hidden = true;
+  $('#empty-state').hidden = false;
+  $('#answer-content').replaceChildren();
+  $('#graph-canvas').replaceChildren();
+  $('#sources-list').replaceChildren();
+  state.graph = null;
+}
+
+function renderChatHistory() {
+  if (!chatHistory) return;
+  chatHistory.replaceChildren();
+  if (!state.sessions.length) {
+    const empty = document.createElement('div');
+    empty.className = 'history-empty';
+    empty.textContent = 'Your conversations will appear here.';
+    chatHistory.append(empty);
+    return;
+  }
+
+  state.sessions.forEach((session) => {
+    const item = document.createElement('button');
+    item.type = 'button';
+    item.className = `history-item${session.id === state.activeSessionId ? ' active' : ''}`;
+    item.textContent = session.title;
+    item.title = session.title;
+    item.addEventListener('click', () => restoreSession(session.id));
+    chatHistory.append(item);
+  });
+}
+
+function resizeQuestionInput() {
+  questionInput.style.height = 'auto';
+  questionInput.style.height = `${Math.min(Math.max(questionInput.scrollHeight, 38), 150)}px`;
+}
+
+function startNewChat() {
+  state.history = [];
+  state.activeSessionId = null;
+  state.lastAnswer = '';
+  clearAudio();
+  resetResponse();
+  questionInput.value = '';
+  setStatus(askStatus, '');
+  resizeQuestionInput();
+  renderChatHistory();
+  questionInput.focus();
+}
+
+function restoreSession(sessionId) {
+  const session = state.sessions.find((item) => item.id === sessionId);
+  if (!session) return;
+
+  state.activeSessionId = session.id;
+  state.history = [...(session.history || [])];
+  state.lastAnswer = session.answer || '';
+  questionInput.value = session.question || '';
+  resizeQuestionInput();
+  clearAudio();
+  resetResponse();
+
+  if (session.data) {
+    const data = session.data;
+    renderAnswer(data.answer || data.reply || '');
+    $('#answer-mode').textContent = `${modeLabel(data.mode)} · ${data.llm_used ? 'LLM' : 'local fallback'}`;
+    $('#answer-runtime').textContent = data.vector_store_used ? 'pgvector' : 'keyword fallback';
+    showCard(answerCard);
+    speakButton.hidden = !data.voice_available;
+    if (data.voice_available) speakButton.textContent = 'Listen ↗';
+
+    const sources = Array.isArray(data.sources) ? data.sources : [];
+    if (sources.length) {
+      renderSources(sources);
+      sourcesCard.hidden = false;
+    }
+
+    if (data.graph) {
+      renderGraph(data.graph);
+      graphCard.hidden = false;
+    }
+  }
+
+  renderChatHistory();
+}
+
+function saveSession(question, data) {
+  let session = state.sessions.find((item) => item.id === state.activeSessionId);
+  if (!session) {
+    session = { id: state.nextSessionId++, title: question.slice(0, 38), history: [], data: null, question: '', answer: '' };
+    state.sessions.unshift(session);
+  }
+  session.title = question.slice(0, 38);
+  session.question = question;
+  session.answer = data.answer || data.reply || '';
+  session.history = [...state.history];
+  session.data = data;
+  state.activeSessionId = session.id;
+  renderChatHistory();
 }
 
 function modeLabel(mode) {
@@ -131,7 +245,7 @@ function createSvgElement(name, attributes = {}) {
 }
 
 function graphNodeColor(kind) {
-  return { topic: '#fdc500', practice: '#62e5a5', resource: '#c08cff' }[kind] || '#66dcff';
+  return { topic: '#e4e4e7', practice: '#a1a1aa', resource: '#c4b5fd' }[kind] || '#d4d4d8';
 }
 
 function graphLayout(nodes) {
@@ -173,7 +287,7 @@ function renderGraph(graph) {
   const svg = createSvgElement('svg', { viewBox: `0 0 ${width} ${height}`, role: 'img', 'aria-label': graph.title || 'Concept map' });
   const defs = createSvgElement('defs');
   const marker = createSvgElement('marker', { id: 'graph-arrow', markerWidth: 7, markerHeight: 7, refX: 6, refY: 3.5, orient: 'auto' });
-  marker.append(createSvgElement('path', { d: 'M0,0 L7,3.5 L0,7 z', fill: '#4b8199' }));
+  marker.append(createSvgElement('path', { d: 'M0,0 L7,3.5 L0,7 z', fill: '#71717a' }));
   defs.append(marker);
   svg.append(defs);
 
@@ -182,7 +296,7 @@ function renderGraph(graph) {
     const from = positions.get(edge.source);
     const to = positions.get(edge.target);
     if (!from || !to) return;
-    const line = createSvgElement('line', { x1: from.x, y1: from.y, x2: to.x, y2: to.y, stroke: '#3b7187', 'stroke-width': 1.2, 'stroke-opacity': .65, 'marker-end': 'url(#graph-arrow)' });
+    const line = createSvgElement('line', { x1: from.x, y1: from.y, x2: to.x, y2: to.y, stroke: '#52525b', 'stroke-width': 1.2, 'stroke-opacity': .65, 'marker-end': 'url(#graph-arrow)' });
     edgeLayer.append(line);
   });
   svg.append(edgeLayer);
@@ -197,7 +311,7 @@ function renderGraph(graph) {
       cy: point.y,
       rx: isTopic ? 72 : 57,
       ry: isTopic ? 28 : 23,
-      fill: isTopic ? 'rgba(253,197,0,.16)' : 'rgba(0,173,238,.12)',
+      fill: isTopic ? 'rgba(228,228,231,.14)' : 'rgba(161,161,170,.12)',
       stroke: graphNodeColor(node.kind),
       'stroke-width': isTopic ? 1.8 : 1.1,
       'stroke-opacity': .85,
@@ -362,6 +476,7 @@ async function askQuestion(event) {
       graphCard.hidden = true;
     }
     state.history = [...state.history, { role: 'user', content: question }, { role: 'assistant', content: answer }].slice(-8);
+    saveSession(question, data);
     setStatus(askStatus, data.degraded ? 'Réponse dégradée : vérifie les sources et les capacités du service.' : 'Réponse prête.', data.degraded ? 'loading' : 'success');
   } catch (error) {
     if (error.name !== 'AbortError') setStatus(askStatus, error.message, 'error');
@@ -435,10 +550,57 @@ async function speakAnswer() {
   }
 }
 
+function setMobileSidebar(open) {
+  appShell.classList.toggle('mobile-sidebar-open', open);
+  mobileMenu?.setAttribute('aria-expanded', String(open));
+}
+
+function toggleSidebar() {
+  if (window.matchMedia('(max-width: 800px)').matches) {
+    setMobileSidebar(!appShell.classList.contains('mobile-sidebar-open'));
+    return;
+  }
+  const collapsed = appShell.classList.toggle('sidebar-collapsed');
+  localStorage.setItem('schoolify-rag-sidebar-collapsed', String(collapsed));
+  sidebarToggle?.setAttribute('aria-expanded', String(!collapsed));
+}
+
 askForm.addEventListener('submit', askQuestion);
 uploadButton.addEventListener('click', uploadFile);
 $('#reindex-button').addEventListener('click', reindex);
 speakButton.addEventListener('click', speakAnswer);
+newChatButton.addEventListener('click', () => {
+  startNewChat();
+  if (window.matchMedia('(max-width: 800px)').matches) setMobileSidebar(false);
+});
+clearHistoryButton.addEventListener('click', () => {
+  state.sessions = [];
+  state.activeSessionId = null;
+  renderChatHistory();
+});
+sidebarToggle.addEventListener('click', toggleSidebar);
+mobileMenu.addEventListener('click', toggleSidebar);
+sidebarBackdrop.addEventListener('click', () => setMobileSidebar(false));
+composerUpload.addEventListener('click', () => uploadInput.click());
+questionInput.addEventListener('input', resizeQuestionInput);
+questionInput.addEventListener('keydown', (event) => {
+  if (event.key === 'Enter' && !event.shiftKey && !event.isComposing) {
+    event.preventDefault();
+    askForm.requestSubmit();
+  }
+});
+document.querySelectorAll('[data-nav]').forEach((link) => {
+  link.addEventListener('click', () => {
+    if (link.dataset.nav === 'library' || link.dataset.nav === 'images') appShell.classList.remove('sidebar-collapsed');
+    if (window.matchMedia('(max-width: 800px)').matches && link.dataset.nav !== 'conversation') setMobileSidebar(false);
+  });
+});
+document.addEventListener('keydown', (event) => {
+  if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 'k') {
+    event.preventDefault();
+    questionInput.focus();
+  }
+});
 serviceKeyInput.addEventListener('change', () => {
   loadFiles();
   loadHealth();
@@ -483,5 +645,11 @@ window.addEventListener('beforeunload', () => {
   if (state.audioUrl) URL.revokeObjectURL(state.audioUrl);
 });
 
+if (localStorage.getItem('schoolify-rag-sidebar-collapsed') === 'true' && window.matchMedia('(min-width: 801px)').matches) {
+  appShell.classList.add('sidebar-collapsed');
+  sidebarToggle.setAttribute('aria-expanded', 'false');
+}
+resizeQuestionInput();
+renderChatHistory();
 loadHealth();
 loadFiles();
