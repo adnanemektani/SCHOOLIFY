@@ -191,8 +191,42 @@ function modeLabel(mode) {
   return { explain: 'Explication', summarize: 'Résumé', quiz: 'Quiz', plan: 'Plan d’étude' }[mode] || mode;
 }
 
-function renderAnswer(text) {
+const markdownReady = () => typeof window.marked?.parse === 'function' && typeof window.DOMPurify?.sanitize === 'function';
+
+if (window.DOMPurify?.addHook) {
+  window.DOMPurify.addHook('afterSanitizeAttributes', (node) => {
+    if (node.tagName === 'A') {
+      node.setAttribute('target', '_blank');
+      node.setAttribute('rel', 'noopener noreferrer');
+    }
+  });
+}
+
+/** Close markdown that is still open mid-stream so partial answers render cleanly (like Streamdown). */
+function repairPartialMarkdown(text) {
+  let fixed = text;
+  if ((fixed.match(/```/g) || []).length % 2) fixed += '\n```';
+  const withoutFences = fixed.replace(/```[\s\S]*?```/g, '');
+  if ((withoutFences.match(/\*\*/g) || []).length % 2) fixed += '**';
+  if ((withoutFences.replace(/\*\*/g, '').match(/`/g) || []).length % 2) fixed += '`';
+  return fixed;
+}
+
+/** Response-style renderer: sanitized streaming markdown with inline source citations. */
+function renderAnswer(text, { streaming = false } = {}) {
   const container = $('#answer-content');
+  container.classList.toggle('is-streaming', streaming);
+  if (!markdownReady()) {
+    renderPlainAnswer(container, text);
+    return;
+  }
+  const source = streaming ? repairPartialMarkdown(String(text || '')) : String(text || '');
+  const withCitations = source.replace(/(?:\[|【)(\d{1,2})(?:\]|】)(?!\()/g, '<sup class="citation">$1</sup>');
+  const html = window.marked.parse(withCitations, { gfm: true, breaks: true });
+  container.innerHTML = window.DOMPurify.sanitize(html, { ADD_ATTR: ['target'] });
+}
+
+function renderPlainAnswer(container, text) {
   container.replaceChildren();
   String(text || '').split('\n').forEach((line) => {
     const trimmed = line.trim();
@@ -427,6 +461,69 @@ async function deleteFile(filename, button) {
   }
 }
 
+/** Stream the answer token by token; fall back to the classic endpoint if streaming is unavailable. */
+async function streamAnswer(payload, signal) {
+  const body = JSON.stringify(payload);
+  let response;
+  try {
+    response = await fetch(`${API_ROOT}/ask/stream`, { method: 'POST', headers: apiHeaders(true), body, signal });
+  } catch (error) {
+    if (error.name === 'AbortError') throw error;
+    response = null;
+  }
+  if (!response?.ok || !response.body) {
+    return requestJson(`${API_ROOT}/ask`, { method: 'POST', body, signal });
+  }
+
+  const reader = response.body.getReader();
+  const decoder = new TextDecoder();
+  let buffer = '';
+  let text = '';
+  let frame = 0;
+  let started = false;
+  const paint = () => {
+    frame = 0;
+    renderAnswer(text, { streaming: true });
+  };
+
+  const handle = (event) => {
+    if (event.type === 'sources' && Array.isArray(event.sources) && event.sources.length) {
+      renderSources(event.sources);
+      sourcesCard.hidden = false;
+    } else if (event.type === 'delta' || event.type === 'replace') {
+      text = event.type === 'delta' ? text + event.text : event.text;
+      if (!started) {
+        started = true;
+        showCard(answerCard);
+        setStatus(askStatus, 'Rédaction de la réponse…', 'loading');
+      }
+      if (!frame) frame = requestAnimationFrame(paint);
+    } else if (event.type === 'error') {
+      throw new Error(event.detail || 'The study assistant is temporarily unavailable.');
+    } else if (event.type === 'done') {
+      return event.response;
+    }
+    return null;
+  };
+
+  while (true) {
+    const { value, done } = await reader.read();
+    buffer += decoder.decode(value || new Uint8Array(), { stream: !done });
+    const lines = buffer.split('\n');
+    buffer = done ? '' : lines.pop();
+    for (const line of lines) {
+      if (!line.trim()) continue;
+      const result = handle(JSON.parse(line));
+      if (result) {
+        if (frame) cancelAnimationFrame(frame);
+        return result;
+      }
+    }
+    if (done) break;
+  }
+  throw new Error('The answer stream ended unexpectedly.');
+}
+
 async function askQuestion(event) {
   event.preventDefault();
   const question = questionInput.value.trim();
@@ -444,11 +541,7 @@ async function askQuestion(event) {
       include_graph: $('#graph-toggle').checked,
       history: state.history.slice(-8),
     };
-    const data = await requestJson(`${API_ROOT}/ask`, {
-      method: 'POST',
-      body: JSON.stringify(payload),
-      signal: state.requestController.signal,
-    });
+    const data = await streamAnswer(payload, state.requestController.signal);
     const answer = typeof data.answer === 'string' ? data.answer : data.reply || '';
     state.lastAnswer = answer;
     renderAnswer(answer);
@@ -511,6 +604,27 @@ async function uploadFile() {
   }
 }
 
+async function importUrl(event) {
+  event.preventDefault();
+  const input = $('#course-url');
+  const button = $('#url-button');
+  const url = input.value.trim();
+  if (!url) return;
+  setLoading(button, true, 'Import…');
+  setStatus(uploadStatus, 'Lecture de la page et indexation…', 'loading');
+  try {
+    const data = await requestJson(`${API_ROOT}/knowledge/url`, { method: 'POST', body: JSON.stringify({ url }) });
+    setStatus(uploadStatus, `« ${data.title} » ajouté · ${data.indexed_chunks} chunks indexés. Pose ta question !`, 'success');
+    input.value = '';
+    await loadFiles();
+    await loadHealth();
+  } catch (error) {
+    setStatus(uploadStatus, error.message, 'error');
+  } finally {
+    setLoading(button, false);
+  }
+}
+
 async function reindex() {
   const button = $('#reindex-button');
   setLoading(button, true, 'Réindexation…');
@@ -567,6 +681,7 @@ function toggleSidebar() {
 
 askForm.addEventListener('submit', askQuestion);
 uploadButton.addEventListener('click', uploadFile);
+$('#url-form').addEventListener('submit', importUrl);
 $('#reindex-button').addEventListener('click', reindex);
 speakButton.addEventListener('click', speakAnswer);
 newChatButton.addEventListener('click', () => {

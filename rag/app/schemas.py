@@ -98,6 +98,15 @@ class UploadResponse(BaseModel):
     message: str
 
 
+class KnowledgeUrlRequest(BaseModel):
+    url: str = Field(min_length=8, max_length=2048)
+
+
+class KnowledgeUrlResponse(UploadResponse):
+    title: str
+    url: str
+
+
 class ReindexResponse(BaseModel):
     ok: bool = True
     files: int

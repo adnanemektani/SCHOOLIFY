@@ -1,6 +1,7 @@
 import asyncio
 import base64
 import hmac
+import json
 import logging
 from contextlib import asynccontextmanager
 from datetime import datetime, timezone
@@ -9,7 +10,7 @@ from typing import Annotated, AsyncIterator
 
 from fastapi import Depends, FastAPI, File, Header, HTTPException, Request, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, StreamingResponse
 from fastapi.staticfiles import StaticFiles
 
 from .config import get_settings
@@ -18,6 +19,8 @@ from .schemas import (
     HealthResponse,
     KnowledgeFile,
     KnowledgeFileList,
+    KnowledgeUrlRequest,
+    KnowledgeUrlResponse,
     ReindexResponse,
     StudyRequest,
     StudyResponse,
@@ -26,6 +29,7 @@ from .schemas import (
     UploadResponse,
 )
 from .uploads import safe_upload_name, unique_upload_path, validate_upload_bytes
+from .web_source import WebSourceError, fetch_web_document, web_document_filename, web_document_markdown
 
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s %(message)s")
@@ -119,6 +123,31 @@ async def ask(
         raise HTTPException(status_code=503, detail="The study assistant is temporarily unavailable.") from error
 
 
+@app.post("/api/v1/ask/stream", tags=["study"])
+async def ask_stream(
+    payload: StudyRequest,
+    request: Request,
+    _: None = Depends(require_api_key),
+) -> StreamingResponse:
+    """Stream the answer as newline-delimited JSON events (sources, delta, replace, done, error)."""
+
+    engine: RagEngine = request.app.state.engine
+
+    async def events() -> AsyncIterator[bytes]:
+        try:
+            async for event in engine.answer_stream(payload):
+                yield (json.dumps(event, ensure_ascii=False) + "\n").encode("utf-8")
+        except Exception as error:
+            logger.exception("Streaming study request failed: %s", type(error).__name__)
+            yield (json.dumps({"type": "error", "detail": "The study assistant is temporarily unavailable."}) + "\n").encode("utf-8")
+
+    return StreamingResponse(
+        events(),
+        media_type="application/x-ndjson",
+        headers={"Cache-Control": "no-store", "X-Accel-Buffering": "no"},
+    )
+
+
 @app.post("/api/v1/chat", response_model=StudyResponse, tags=["study"])
 async def chat(
     payload: StudyRequest,
@@ -207,6 +236,41 @@ async def upload_knowledge_file(
         filename=destination.name,
         indexed_chunks=result.inserted,
         message="The course was added and the knowledge index was refreshed.",
+    )
+
+
+@app.post("/api/v1/knowledge/url", response_model=KnowledgeUrlResponse, tags=["knowledge"])
+async def add_knowledge_url(
+    payload: KnowledgeUrlRequest,
+    request: Request,
+    _: None = Depends(require_api_key),
+) -> KnowledgeUrlResponse:
+    """Fetch an external training page and index its readable text as a course."""
+
+    engine: RagEngine = request.app.state.engine
+    if not engine.repository.ready:
+        raise HTTPException(status_code=503, detail="The vector database is not ready.")
+    try:
+        document = await fetch_web_document(payload.url, settings.max_upload_mb * 1024 * 1024)
+    except WebSourceError as error:
+        raise HTTPException(status_code=400, detail=str(error)) from error
+
+    destination: Path | None = None
+    try:
+        destination = unique_upload_path(settings.upload_dir, web_document_filename(document))
+        await asyncio.to_thread(destination.write_text, web_document_markdown(document), "utf-8")
+        result = await engine.index_knowledge(reset=False)
+    except Exception as error:
+        logger.exception("Knowledge URL import failed: %s", type(error).__name__)
+        detail = "The page was saved but could not be indexed yet." if destination and destination.exists() else "The page could not be stored."
+        raise HTTPException(status_code=503, detail=detail) from error
+
+    return KnowledgeUrlResponse(
+        filename=destination.name,
+        indexed_chunks=result.inserted,
+        message="The page was added and the knowledge index was refreshed.",
+        title=document.title,
+        url=document.url,
     )
 
 

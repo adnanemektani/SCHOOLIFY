@@ -1,7 +1,7 @@
 import asyncio
 import logging
 import sys
-from collections.abc import Coroutine
+from collections.abc import AsyncIterator, Coroutine
 from typing import Any, TypeVar
 
 from langchain_core.documents import Document
@@ -119,44 +119,37 @@ class RagEngine:
                 logger.warning("Vector retrieval failed, using local fallback: %s", type(error).__name__)
         return keyword_search(question, self.fallback_documents, self.settings.max_context_documents), False
 
-    async def answer(self, request: StudyRequest) -> StudyResponse:
-        documents, vector_store_used = await self.retrieve(request.question or "")
-        context = self._format_context(documents)
-        history = self._format_history(request.history)
+    def _chain_input(self, request: StudyRequest, context: str) -> dict[str, Any]:
+        return {
+            "mode": request.mode,
+            "level": request.level,
+            "subject": request.subject or "Non précisé",
+            "question": request.question,
+            "history": self._format_history(request.history) or "Aucune conversation précédente.",
+            "context": context,
+        }
 
-        answer = ""
-        llm_used = False
-        degraded = False
-        if self._answer_chain is not None:
-            try:
-                answer = await self._answer_chain.ainvoke(
-                    {
-                        "mode": request.mode,
-                        "level": request.level,
-                        "subject": request.subject or "Non précisé",
-                        "question": request.question,
-                        "history": history or "Aucune conversation précédente.",
-                        "context": context,
-                    }
-                )
-                llm_used = bool(answer.strip())
-            except Exception as error:
-                logger.warning("LLM answer failed: %s", type(error).__name__)
-        if not answer.strip():
-            answer = self._fallback_answer(request, documents)
-            degraded = not llm_used or not vector_store_used
-
+    async def _build_graph(self, request: StudyRequest, context: str) -> StudyGraph | None:
+        if not should_render_graph(request.mode, request.question or "", request.include_graph):
+            return None
         graph: StudyGraph | None = None
-        if should_render_graph(request.mode, request.question or "", request.include_graph):
-            if self._graph_chain is not None:
-                try:
-                    raw_graph = await self._graph_chain.ainvoke({"request": graph_prompt(request.question or "", request.subject, context)})
-                    graph = normalise_graph(raw_graph, request.question or "", request.subject)
-                except Exception as error:
-                    logger.warning("Graph generation failed: %s", type(error).__name__)
-            if graph is None:
-                graph = fallback_graph(request.question or "", request.subject)
+        if self._graph_chain is not None:
+            try:
+                raw_graph = await self._graph_chain.ainvoke({"request": graph_prompt(request.question or "", request.subject, context)})
+                graph = normalise_graph(raw_graph, request.question or "", request.subject)
+            except Exception as error:
+                logger.warning("Graph generation failed: %s", type(error).__name__)
+        return graph or fallback_graph(request.question or "", request.subject)
 
+    def _response(
+        self,
+        request: StudyRequest,
+        answer: str,
+        documents: list[Document],
+        graph: StudyGraph | None,
+        llm_used: bool,
+        vector_store_used: bool,
+    ) -> StudyResponse:
         clean_answer = answer.strip()
         return StudyResponse(
             answer=clean_answer,
@@ -168,8 +161,52 @@ class RagEngine:
             llm_used=llm_used,
             vector_store_used=vector_store_used,
             voice_available=self.voice.available,
-            degraded=degraded,
+            degraded=not llm_used,
         )
+
+    async def answer(self, request: StudyRequest) -> StudyResponse:
+        documents, vector_store_used = await self.retrieve(request.question or "")
+        context = self._format_context(documents)
+
+        answer = ""
+        llm_used = False
+        if self._answer_chain is not None:
+            try:
+                answer = await self._answer_chain.ainvoke(self._chain_input(request, context))
+                llm_used = bool(answer.strip())
+            except Exception as error:
+                logger.warning("LLM answer failed: %s", type(error).__name__)
+        if not answer.strip():
+            answer = self._fallback_answer(request, documents)
+
+        graph = await self._build_graph(request, context)
+        return self._response(request, answer, documents, graph, llm_used, vector_store_used)
+
+    async def answer_stream(self, request: StudyRequest) -> AsyncIterator[dict[str, Any]]:
+        """Yield the answer as it is generated: sources first, then text deltas, then the final payload."""
+
+        documents, vector_store_used = await self.retrieve(request.question or "")
+        context = self._format_context(documents)
+        yield {"type": "sources", "sources": [self._source(document).model_dump() for document in documents]}
+
+        answer = ""
+        llm_used = False
+        if self._answer_chain is not None:
+            try:
+                async for delta in self._answer_chain.astream(self._chain_input(request, context)):
+                    if delta:
+                        answer += delta
+                        yield {"type": "delta", "text": delta}
+                llm_used = bool(answer.strip())
+            except Exception as error:
+                logger.warning("LLM streaming answer failed: %s", type(error).__name__)
+        if not answer.strip():
+            answer = self._fallback_answer(request, documents)
+            yield {"type": "replace", "text": answer}
+
+        graph = await self._build_graph(request, context)
+        response = self._response(request, answer, documents, graph, llm_used, vector_store_used)
+        yield {"type": "done", "response": response.model_dump()}
 
     async def synthesize(self, text: str) -> bytes:
         return await self.voice.synthesize(text)

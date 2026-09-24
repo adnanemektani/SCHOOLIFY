@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="theme-color" content="#0d0d0d" />
     <title>Schoolify · RAG</title>
-    <link rel="stylesheet" href="/test-ui/styles.css?v=20260924-chatgpt" />
+    <link rel="stylesheet" href="/test-ui/styles.css?v=20260924-response" />
   </head>
   <body>
     <div class="app-shell" id="app-shell">
@@ -80,6 +80,17 @@
               <button id="upload-button" class="sidebar-button primary" type="button" disabled>Index file</button>
               <button id="reindex-button" class="sidebar-button" type="button">Reindex all</button>
             </div>
+            <form class="url-box" id="url-form">
+              <label class="url-box-label" for="course-url">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1" /></svg>
+                <span>Add a link</span>
+              </label>
+              <p class="url-box-hint">Paste an external course or training page. Its content will be used to answer you.</p>
+              <div class="url-box-row">
+                <input id="course-url" type="url" inputmode="url" autocomplete="off" spellcheck="false" maxlength="2048" placeholder="https://…" required />
+                <button id="url-button" class="sidebar-button primary" type="submit">Import</button>
+              </div>
+            </form>
             <div id="upload-status" class="inline-status" role="status" aria-live="polite"></div>
             <div id="file-list" class="file-list"></div>
           </section>
@@ -214,6 +225,8 @@
         </div>
       </main>
     </div>
-    <script src="/test-ui/app.js?v=20260924-chatgpt" defer></script>
+    <script src="/test-ui/vendor/marked.min.js?v=15.0.12" defer></script>
+    <script src="/test-ui/vendor/purify.min.js?v=3.2.6" defer></script>
+    <script src="/test-ui/app.js?v=20260924-response" defer></script>
   </body>
 </html>

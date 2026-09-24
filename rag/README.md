@@ -85,6 +85,30 @@ Content-Type: application/json
 
 The response contains `answer`, `sources`, an optional `graph`, and capability flags. `message` is also accepted as a shorter request field.
 
+### Stream an answer
+
+```http
+POST /api/v1/ask/stream
+Content-Type: application/json
+```
+
+Same body as `/api/v1/ask`. The response is newline-delimited JSON (`application/x-ndjson`): one `sources` event, then `delta` events with text chunks (or one `replace` event for the offline fallback), then a `done` event holding the full `/ask` response. An `error` event is sent if generation fails. The `/test` UI renders these chunks as live, sanitized Markdown (Response-style, with `marked` + `DOMPurify` vendored in `ui/vendor`) and falls back to `/api/v1/ask` when streaming is unavailable.
+
+Answers are intentionally short (about 80–150 words): a direct answer, a few key bullets and an optional example.
+
+### Import an external training page
+
+```http
+POST /api/v1/knowledge/url
+Content-Type: application/json
+```
+
+```json
+{ "url": "https://example.com/course/lesson-1" }
+```
+
+The service fetches the page (HTML, plain text or PDF), extracts its readable text, stores it as a Markdown file in `data/knowledge/uploads` and indexes it, so the next questions are answered from that page. Only public `http(s)` addresses are accepted (private, loopback and link-local targets are refused, including after redirects), and the download is limited to `MAX_UPLOAD_MB`. Pages that render their content only with JavaScript cannot be read. Imported pages appear in the file list and can be deleted like uploads.
+
 ### Generate speech
 
 ```http
