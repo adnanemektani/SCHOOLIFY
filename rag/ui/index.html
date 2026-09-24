@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#03060c" />
+    <title>Schoolify RAG Lab</title>
+    <link rel="stylesheet" href="/test-ui/styles.css" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <header class="topbar">
+        <a class="brand" href="/test" aria-label="Schoolify RAG Lab">
+          <span class="brand-mark">✦</span>
+          <span>schoolify <b>/ rag lab</b></span>
+        </a>
+        <div class="topbar-actions">
+          <span id="service-status" class="status-pill status-loading">Connexion…</span>
+          <a class="ghost-link" href="/docs" target="_blank" rel="noreferrer">API docs ↗</a>
+        </div>
+      </header>
+
+      <main>
+        <section class="hero">
+          <div class="hero-copy">
+            <span class="eyebrow"><i></i> Test environment</span>
+            <h1>Teste ton<br /><em>laboratoire d’étude.</em></h1>
+            <p>Pose une question, vérifie les sources et ajoute tes propres supports. Cette page utilise directement le service RAG, sans passer par l’interface Next.js.</p>
+          </div>
+          <div class="hero-orbit" aria-hidden="true">
+            <div class="orbit orbit-one"></div>
+            <div class="orbit orbit-two"></div>
+            <div class="orbit-core">✦</div>
+            <span class="orbit-dot dot-one"></span>
+            <span class="orbit-dot dot-two"></span>
+          </div>
+        </section>
+
+        <section class="workspace" aria-label="RAG test workspace">
+          <aside class="control-panel panel">
+            <div class="panel-heading">
+              <span class="panel-kicker">01 / Question</span>
+              <h2>Que veux-tu comprendre ?</h2>
+            </div>
+            <form id="ask-form">
+              <label class="field-label" for="question">Ta question</label>
+              <textarea id="question" name="question" rows="5" maxlength="4000" required placeholder="Ex. Explique-moi le RAG avec un exemple simple…"></textarea>
+              <div class="control-grid">
+                <label>Mode<select id="mode"><option value="explain">Expliquer</option><option value="summarize">Résumer</option><option value="quiz">Quiz</option><option value="plan">Planifier</option></select></label>
+                <label>Niveau<select id="level"><option value="decouvre">Débutant</option><option value="intermediaire" selected>Intermédiaire</option><option value="avance">Avancé</option></select></label>
+                <label class="subject-field">Sujet<input id="subject" maxlength="120" placeholder="IA, Web3…" /></label>
+              </div>
+              <label class="toggle-row"><input id="graph-toggle" type="checkbox" checked /><span class="toggle-control"></span><span>Afficher la carte de concepts</span></label>
+              <button id="ask-button" class="primary-button" type="submit">Lancer l’étude <b>→</b></button>
+            </form>
+            <div class="suggestions">
+              <span>Essayer</span>
+              <button type="button" data-question="Explique-moi la différence entre active recall et reread">Active recall</button>
+              <button type="button" data-question="Donne-moi un plan de révision pour l’IA générative">Plan d’IA</button>
+              <button type="button" data-question="Fais-moi un quiz court sur les bases de Web3">Quiz Web3</button>
+            </div>
+            <div id="ask-status" class="inline-status" role="status" aria-live="polite"></div>
+          </aside>
+
+          <section class="results-panel" aria-live="polite">
+            <div id="empty-state" class="empty-state">
+              <div class="empty-icon">✦</div>
+              <h2>Ton espace de réponse apparaîtra ici.</h2>
+              <p>Les sources, la carte de concepts et la voix ElevenLabs seront vérifiables depuis cette page.</p>
+            </div>
+
+            <article id="answer-card" class="answer-card panel" hidden>
+              <div class="answer-heading">
+                <div><span class="panel-kicker">02 / Réponse</span><h2>Une façon de l’aborder</h2></div>
+                <div class="answer-actions">
+                  <button id="speak-button" class="secondary-button" type="button" hidden>Écouter ↗</button>
+                  <audio id="answer-audio" controls hidden></audio>
+                </div>
+              </div>
+              <div id="answer-content" class="answer-content"></div>
+              <div class="answer-footer"><span id="answer-mode"></span><span id="answer-runtime"></span></div>
+            </article>
+
+            <article id="graph-card" class="graph-card panel" hidden>
+              <div class="card-heading"><div><span class="panel-kicker">Visuel</span><h2 id="graph-title">Carte de compréhension</h2></div><span id="graph-count" class="count-badge"></span></div>
+              <div id="graph-canvas" class="graph-canvas"></div>
+              <div class="graph-legend"><span><i class="topic-dot"></i> Thème</span><span><i class="concept-dot"></i> Concept</span><span><i class="practice-dot"></i> Pratique</span></div>
+            </article>
+
+            <article id="sources-card" class="sources-card panel" hidden>
+              <div class="card-heading"><div><span class="panel-kicker">03 / Sources</span><h2>Vérifie les passages</h2></div><span id="source-count" class="count-badge"></span></div>
+              <div id="sources-list" class="sources-list"></div>
+            </article>
+          </section>
+        </section>
+
+        <section class="knowledge-section panel">
+          <div class="knowledge-copy">
+            <span class="panel-kicker">04 / Knowledge loader</span>
+            <h2>Ajoute tes supports</h2>
+            <p>Dépose un fichier Markdown, texte ou PDF. Il sera sauvegardé dans le volume Docker puis indexé dans PostgreSQL/pgvector.</p>
+            <div class="upload-rule"><span>Formats</span><strong>.md · .txt · .pdf</strong><span>Limite</span><strong id="upload-limit">20 MB</strong></div>
+          </div>
+          <div class="upload-panel">
+            <label id="drop-zone" class="drop-zone" for="course-file">
+              <span class="upload-icon">↑</span>
+              <strong>Choisis un fichier</strong>
+              <small>ou glisse-le ici</small>
+              <input id="course-file" type="file" accept=".md,.txt,.pdf,text/markdown,text/plain,application/pdf" />
+            </label>
+            <div class="upload-actions">
+              <button id="upload-button" class="primary-button" type="button" disabled>Indexer le support</button>
+              <button id="reindex-button" class="secondary-button" type="button">Réindexer tout</button>
+            </div>
+            <div id="upload-status" class="inline-status" role="status" aria-live="polite"></div>
+            <div id="file-list" class="file-list"></div>
+          </div>
+        </section>
+
+        <section class="settings-strip">
+          <div><span class="panel-kicker">Optional</span><strong>Service key</strong><p>Only needed when <code>RAG_API_KEY</code> is enabled.</p></div>
+          <label class="key-input"><span class="sr-only">RAG service key</span><input id="service-key" type="password" autocomplete="off" placeholder="X-RAG-API-Key" /></label>
+        </section>
+      </main>
+
+      <footer class="footer"><span>Schoolify RAG Lab</span><span>FastAPI · LangChain · pgvector · ElevenLabs</span></footer>
+    </div>
+    <script src="/test-ui/app.js" defer></script>
+  </body>
+</html>
