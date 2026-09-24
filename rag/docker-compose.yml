@@ -1,0 +1,58 @@
+services:
+  db:
+    image: pgvector/pgvector:pg16
+    container_name: schoolify-rag-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: schoolify_rag
+      POSTGRES_PASSWORD: schoolify_rag_dev_password
+      POSTGRES_DB: schoolify_rag
+    ports:
+      - "5435:5432"
+    volumes:
+      - schoolify_rag_postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U schoolify_rag -d schoolify_rag"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+
+  api:
+    build: .
+    container_name: schoolify-rag-api
+    restart: unless-stopped
+    env_file:
+      - path: .env
+        required: true
+      - path: ../ai-service/.env
+        required: false
+    environment:
+      APP_ENV: ${APP_ENV:-development}
+      DATABASE_URL: ${RAG_DOCKER_DATABASE_URL:-postgresql://schoolify_rag:schoolify_rag_dev_password@db:5432/schoolify_rag}
+      LLM_MODEL: ${LLM_MODEL:-openai/gpt-oss-120b}
+      LLM_BASE_URL: ${LLM_BASE_URL:-https://api.groq.com/openai/v1}
+      ELEVENLABS_API_KEY: ${ELEVENLABS_API_KEY:-}
+      ELEVENLABS_VOICE_ID: ${ELEVENLABS_VOICE_ID:-21m00Tcm4TlvDq8ikWAM}
+      ELEVENLABS_MODEL_ID: ${ELEVENLABS_MODEL_ID:-eleven_multilingual_v2}
+      RAG_API_KEY: ${RAG_API_KEY:-}
+      CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:3000}
+      AUTO_INGEST: ${AUTO_INGEST:-true}
+    ports:
+      - "8000:8000"
+    volumes:
+      - schoolify_rag_embedding_cache:/app/.cache/fastembed
+      - schoolify_rag_uploads:/app/data/knowledge/uploads
+    depends_on:
+      db:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health', timeout=3)"]
+      interval: 10s
+      timeout: 5s
+      retries: 20
+      start_period: 120s
+
+volumes:
+  schoolify_rag_postgres_data:
+  schoolify_rag_embedding_cache:
+  schoolify_rag_uploads:
