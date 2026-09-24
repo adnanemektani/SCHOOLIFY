@@ -2,6 +2,7 @@ import Link from "next/link";
 import { ChatWidget } from "@/components/chat-widget";
 import { SiteHeader } from "@/components/brand";
 import { Reveal } from "@/components/reveal";
+import { StepsSection } from "@/components/steps-section";
 
 const tracks = [
   { title: "Web3 & Blockchain", text: "Comprendre, construire et faire évoluer les nouveaux usages du web." },
@@ -51,7 +52,7 @@ export default function Home() {
 
       <section id="metiers" className="jobs-section section-shell"><div className="jobs-copy"><div className="section-kicker">Des opportunités réelles</div><h2>Ta curiosité<br />peut devenir un <em>métier.</em></h2><p>Le Web3 et l’IA ont besoin de profils divers : créatifs, analytiques, organisés, visionnaires. Peut-être le tien.</p><Link className="button button-outline" href="/signup">Explorer les parcours <span>→</span></Link></div><div className="jobs-list">{jobs.map((job, index) => <div key={job}><span>0{index + 1}</span><strong>{job}</strong><i>↗</i></div>)}</div></section>
 
-      <section id="comment-ca-marche" className="steps-section"><div className="section-shell"><div className="steps-heading"><div className="section-kicker">Simplement</div><h2>De l’envie à<br /><em>l’impact.</em></h2></div><div className="steps-grid"><article><span>01</span><div className="step-icon">⌁</div><h3>Tu crées ton espace</h3><p>Quelques informations, et ton tableau de bord personnalisé est prêt.</p></article><article><span>02</span><div className="step-icon">◉</div><h3>Tu choisis ton rythme</h3><p>Explore, pratique et avance selon ton énergie et tes objectifs.</p></article><article><span>03</span><div className="step-icon">↗</div><h3>Tu passes à l’action</h3><p>Transforme tes nouvelles compétences en projets concrets.</p></article></div></div></section>
+      <StepsSection />
 
       <section className="quote-section section-shell"><div className="quote-glow" /><p>“Je ne savais pas par où commencer dans la tech. Schoolify m’a donné une direction — et surtout la confiance de continuer.”</p><div><span className="quote-avatar">NK</span><span><strong>Nour K.</strong><small>Apprenante, Casablanca</small></span></div></section>
 
